@@ -1,0 +1,29 @@
+{
+  "name": "sense-list",
+  "version": "0.0.0",
+  "description": "a fullstack list app built with reactjs and nestjs",
+  "main": "index.js",
+  "repository": "https://github.com/gmmurray/sense-list",
+  "author": "https://gregmurray.org",
+  "license": "ISC",
+  "scripts": {
+    "start-front": "yarn --cwd ./workspaces/frontend/yarn start",
+    "build-front": "yarn --cwd ./workspaces/frontend/yarn build",
+    "test-front": "yarn --cwd ./workspaces/frontend/yarn test",
+    "start-back": "yarn --cwd ./workspaces/backend/yarn start",
+    "start-back:dev": "yarn --cwd ./workspaces/backend/yarn start:dev",
+    "start-back:prod": "yarn --cwd ./workspaces/backend/yarn start:prod",
+    "test-back": "yarn --cwd ./workspaces/backend/yarn test:watch"
+  },
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "workspaces/*"
+    ],
+    "nohoist": [
+      "workspaces/**/webpack-dev-server",
+      "**/babel-loader",
+      "**/babel-jest"
+    ]
+  }
+}
