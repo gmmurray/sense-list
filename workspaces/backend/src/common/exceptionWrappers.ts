@@ -49,12 +49,15 @@ export const invalidValuesError = (): HttpException => {
 };
 
 export const handleHttpRequestError = (err): HttpException => {
-  console.log(err);
-  if (err.name === MongooseError.ValidationError.name)
-    throw mongooseValidationError(err);
-  if (err.name === MongooseError.DocumentNotFoundError.name)
-    throw noAccessOrDoesNotExistError();
-  else if (err.name === MongooseError.CastError.name)
-    throw invalidValuesError();
-  throw internalServerError();
+  // console.log(err);
+  switch (err.name) {
+    case MongooseError.ValidationError.name:
+      throw mongooseValidationError(err);
+    case MongooseError.DocumentNotFoundError.name:
+      throw noAccessOrDoesNotExistError();
+    case MongooseError.CastError.name:
+      throw invalidValuesError();
+    default:
+      throw internalServerError();
+  }
 };
