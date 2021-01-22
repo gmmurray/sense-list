@@ -7,8 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { mockUser } from 'src/mock/users.mock';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthRequest } from 'src/authz/authzUser';
+import { Permissions } from 'src/permissions.decorator';
+import { PermissionsGuard } from 'src/permissions.guard';
 import {
   CreateListDto,
   ListDto,
@@ -26,9 +31,11 @@ export class ListsController {
    *
    * @param query
    */
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Get()
-  async index(@Query() query?: QueryListDto) {
-    const userId = mockUser.id;
+  @Permissions('read:lists')
+  async index(@Req() { user }: AuthRequest, @Query() query?: QueryListDto) {
+    const userId = user.sub;
     if (query) {
       return this.listService.findByQuery(new QueryListDto(query), userId);
     }
@@ -40,9 +47,15 @@ export class ListsController {
    *
    * @param id
    */
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Get(':id')
-  async getById(@Param('id') id: string): Promise<ListDto> {
-    return await this.listService.findById(id, mockUser.id);
+  @Permissions('read:lists')
+  async getById(
+    @Req() { user }: AuthRequest,
+    @Param('id') id: string,
+  ): Promise<ListDto> {
+    const userId = user.sub;
+    return await this.listService.findById(id, userId);
   }
 
   /**
@@ -50,9 +63,14 @@ export class ListsController {
    *
    * @param createListDto
    */
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Post()
-  async create(@Body() createListDto: CreateListDto): Promise<ListDto> {
-    const userId = mockUser.id;
+  @Permissions('write:lists')
+  async create(
+    @Req() { user }: AuthRequest,
+    @Body() createListDto: CreateListDto,
+  ): Promise<ListDto> {
+    const userId = user.sub;
     return await this.listService.create(createListDto, userId);
   }
 
@@ -62,18 +80,30 @@ export class ListsController {
    * @param id
    * @param updates
    */
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Patch(':id')
+  @Permissions('write:lists')
   async patch(
+    @Req() { user }: AuthRequest,
     @Param('id') id: string,
     @Body() updates: PatchListDto,
   ): Promise<void> {
-    const userId = mockUser.id;
+    const userId = user.sub;
     return await this.listService.patch(id, new PatchListDto(updates), userId);
   }
 
+  /**
+   * Deletes a list. Requires list-specific user delete access
+   * @param id
+   */
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<void> {
-    const userId = mockUser.id;
+  @Permissions('delete:lists')
+  async delete(
+    @Req() { user }: AuthRequest,
+    @Param('id') id: string,
+  ): Promise<void> {
+    const userId = user.sub;
     return await this.listService.delete(id, userId);
   }
 }
