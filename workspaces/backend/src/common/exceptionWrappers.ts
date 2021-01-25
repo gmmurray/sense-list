@@ -1,11 +1,8 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 import { Error as MongooseError } from 'mongoose';
 
-export const internalServerError = (): HttpException => {
-  return new HttpException(
-    'Internal Server Error',
-    HttpStatus.INTERNAL_SERVER_ERROR,
-  );
+export const internalServerError = (error): HttpException => {
+  return new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
 };
 
 export const noAccessOrDoesNotExistError = (): HttpException => {
@@ -58,6 +55,6 @@ export const handleHttpRequestError = (err): HttpException => {
     case MongooseError.CastError.name:
       throw invalidValuesError();
     default:
-      throw internalServerError();
+      throw internalServerError(err);
   }
 };

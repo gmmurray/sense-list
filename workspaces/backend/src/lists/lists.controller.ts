@@ -11,20 +11,22 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+
+import { ListApiPermissions } from 'src/authz/ApiPermissions';
 import { AuthRequest } from 'src/authz/authzUser';
-import { Permissions } from 'src/permissions.decorator';
-import { PermissionsGuard } from 'src/permissions.guard';
+import { Permissions } from 'src/authz/permissions.decorator';
+import { PermissionsGuard } from 'src/authz/permissions.guard';
 import {
   CreateListDto,
   ListDto,
   PatchListDto,
   QueryListDto,
-} from './definitions/list';
-import { ListService } from './lists.service';
+} from './definitions/list.dto';
+import { ListsService } from './lists.service';
 
 @Controller('lists')
 export class ListsController {
-  constructor(private readonly listService: ListService) {}
+  constructor(private readonly listsService: ListsService) {}
 
   /**
    * Gets all accessible lists. Requires list-specific user read access
@@ -33,13 +35,13 @@ export class ListsController {
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Get()
-  @Permissions('read:lists')
+  @Permissions(ListApiPermissions.read)
   async index(@Req() { user }: AuthRequest, @Query() query?: QueryListDto) {
     const userId = user.sub;
     if (query) {
-      return this.listService.findByQuery(new QueryListDto(query), userId);
+      return this.listsService.findByQuery(new QueryListDto(query), userId);
     }
-    return this.listService.findAll(userId);
+    return await this.listsService.findAll(userId);
   }
 
   /**
@@ -49,29 +51,29 @@ export class ListsController {
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Get(':id')
-  @Permissions('read:lists')
+  @Permissions(ListApiPermissions.read)
   async getById(
     @Req() { user }: AuthRequest,
     @Param('id') id: string,
   ): Promise<ListDto> {
     const userId = user.sub;
-    return await this.listService.findById(id, userId);
+    return await this.listsService.findById(id, userId);
   }
 
   /**
-   * Creates a new list. Requires general user read access
+   * Creates a new list. Requires general user write access
    *
    * @param createListDto
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Post()
-  @Permissions('write:lists')
+  @Permissions(ListApiPermissions.write)
   async create(
     @Req() { user }: AuthRequest,
     @Body() createListDto: CreateListDto,
   ): Promise<ListDto> {
     const userId = user.sub;
-    return await this.listService.create(createListDto, userId);
+    return await this.listsService.create(createListDto, userId);
   }
 
   /**
@@ -82,14 +84,14 @@ export class ListsController {
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Patch(':id')
-  @Permissions('write:lists')
+  @Permissions(ListApiPermissions.write)
   async patch(
     @Req() { user }: AuthRequest,
     @Param('id') id: string,
     @Body() updates: PatchListDto,
   ): Promise<void> {
     const userId = user.sub;
-    return await this.listService.patch(id, new PatchListDto(updates), userId);
+    return await this.listsService.patch(id, new PatchListDto(updates), userId);
   }
 
   /**
@@ -98,12 +100,12 @@ export class ListsController {
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Delete(':id')
-  @Permissions('delete:lists')
+  @Permissions(ListApiPermissions.delete)
   async delete(
     @Req() { user }: AuthRequest,
     @Param('id') id: string,
   ): Promise<void> {
     const userId = user.sub;
-    return await this.listService.delete(id, userId);
+    return await this.listsService.delete(id, userId);
   }
 }

@@ -3,13 +3,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { List, ListSchema } from './definitions/list.schema';
 import { ListsController } from './lists.controller';
-import { ListService } from './lists.service';
+import { ListsService } from './lists.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: List.name, schema: ListSchema }]),
   ],
   controllers: [ListsController],
-  providers: [ListService],
+  providers: [ListsService],
+  exports: [ListsService],
 })
 export class ListsModule {}

@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-import { ListType } from 'src/lists/definitions/listType';
+import { ListType } from 'src/common/listType';
 
 export type ListDocument = List & Document;
 
@@ -33,6 +33,9 @@ export class List {
 
   @Prop()
   updatedAt: Date;
+
+  @Prop({ ref: 'ListItem ' })
+  listItems: Types.ObjectId[];
 }
 
 export const ListSchema = SchemaFactory.createForClass(List);

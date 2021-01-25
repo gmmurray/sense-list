@@ -2,8 +2,9 @@ import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ListsModule } from './lists.module';
 import { MongooseModule } from '@nestjs/mongoose';
+
+import { ListsModule } from './lists.module';
 
 describe('Lists', () => {
   let app: INestApplication;

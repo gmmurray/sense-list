@@ -13,7 +13,8 @@
     "start-back": "yarn --cwd ./workspaces/backend/yarn start",
     "start-back:dev": "yarn --cwd ./workspaces/backend/yarn start:dev",
     "start-back:prod": "yarn --cwd ./workspaces/backend/yarn start:prod",
-    "test-back": "yarn --cwd ./workspaces/backend/yarn test:watch"
+    "test-back": "yarn --cwd ./workspaces/backend/yarn test:watch",
+    "debug-back": "yarn --cwd ./workspaces/backend/yarn start:debug"
   },
   "private": true,
   "workspaces": {
