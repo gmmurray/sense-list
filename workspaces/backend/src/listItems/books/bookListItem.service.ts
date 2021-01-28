@@ -1,5 +1,11 @@
-import { InjectModel } from '@nestjs/mongoose';
-import { Error as MongooseError, FilterQuery, Model, Types } from 'mongoose';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import {
+  Connection,
+  Error as MongooseError,
+  FilterQuery,
+  Model,
+  Types,
+} from 'mongoose';
 
 import {
   BookListItem,
@@ -18,6 +24,9 @@ import { DataTotalResponse } from 'src/common/responseWrappers';
 import { handleHttpRequestError } from 'src/common/exceptionWrappers';
 import { OpenLibraryService } from '../../openLibrary/openLibrary.service';
 import { cleanDtoFields } from 'src/common/dtoHelpers';
+import { ListType } from 'src/common/listType';
+import { getMultiListItemPropName } from 'src/common/mongooseTableHelpers';
+import { InternalServerErrorException } from '@nestjs/common';
 
 export class BookListItemsService extends ListItemsService<
   BookListItemDocument,
@@ -29,10 +38,11 @@ export class BookListItemsService extends ListItemsService<
   constructor(
     @InjectModel(BookListItem.name)
     readonly bookListItemsModel: Model<BookListItemDocument>,
+    @InjectConnection() private connection: Connection,
     readonly listService: ListsService,
     readonly openLibraryService: OpenLibraryService,
   ) {
-    super(bookListItemsModel, listService);
+    super(bookListItemsModel, connection, listService);
   }
 
   async findAll(
@@ -40,11 +50,15 @@ export class BookListItemsService extends ListItemsService<
     listId: string,
   ): Promise<DataTotalResponse<BookListItemDto>> {
     try {
-      await this.hasListItemReadAccess(userId, listId);
-      const items = await this.bookListItemsModel.find({ list: listId }).exec();
+      const list = await this.hasListItemReadAccess(userId, listId);
+      if (!list) throw new MongooseError.DocumentNotFoundError(null);
+
+      const items = await this.bookListItemsModel
+        .find({ list: new Types.ObjectId(listId) })
+        .exec();
 
       return new DataTotalResponse(
-        items.map(doc => BookListItemDto.create(doc)),
+        items.map(doc => BookListItemDto.assign(doc)),
       );
     } catch (error) {
       handleHttpRequestError(error);
@@ -58,7 +72,8 @@ export class BookListItemsService extends ListItemsService<
   ): Promise<DataTotalResponse<BookListItemDto>> {
     const dto: QueryBookListItemDto = cleanDtoFields(queryDto);
     try {
-      await this.hasListItemReadAccess(userId, listId);
+      const list = await this.hasListItemReadAccess(userId, listId);
+      if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
       const result = await this.bookListItemsModel
         .find({
@@ -69,7 +84,7 @@ export class BookListItemsService extends ListItemsService<
         })
         .exec();
       return new DataTotalResponse(
-        result.map(doc => BookListItemDto.create(doc)),
+        result.map(doc => BookListItemDto.assign(doc)),
       );
     } catch (error) {
       handleHttpRequestError(error);
@@ -83,9 +98,10 @@ export class BookListItemsService extends ListItemsService<
 
       if (!result) throw new MongooseError.DocumentNotFoundError(null);
 
-      await this.hasListItemReadAccess(userId, result.list);
+      const list = await this.hasListItemReadAccess(userId, result.list);
+      if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
-      return BookListItemDto.create(result);
+      return BookListItemDto.assign(result);
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -96,7 +112,9 @@ export class BookListItemsService extends ListItemsService<
     userId: string,
   ): Promise<BookListItemDto> {
     try {
-      await this.hasListItemWriteAccess(userId, createDto.list);
+      const list = await this.hasListItemWriteAccess(userId, createDto.list);
+      if (!list) throw new MongooseError.DocumentNotFoundError(null);
+
       const apiBook = await this.openLibraryService.getBookByIsbn(
         createDto.isbn,
       );
@@ -104,23 +122,33 @@ export class BookListItemsService extends ListItemsService<
       if (!apiBook) throw new MongooseError.ValidationError(null);
 
       const normalizedBook = BookListItemDomain.create(
-        createDto.list,
+        new Types.ObjectId(createDto.list),
         createDto.ordinal,
         apiBook,
       );
 
-      const created = new this.bookListItemsModel({
-        ...normalizedBook,
+      const session = await this.connection.startSession();
+      let result: BookListItemDocument | undefined;
+
+      await this.connection.transaction(async () => {
+        const created = new this.bookListItemsModel({
+          ...normalizedBook,
+        });
+        result = await created.save({ session });
+
+        await this.listService.updateListItemsInList(
+          new Types.ObjectId(createDto.list),
+          userId,
+          '$push',
+          getMultiListItemPropName(ListType.Book),
+          result._id,
+          session,
+        );
       });
-      const result = await created.save();
 
-      await this.listService.addListItemToList(
-        createDto.list,
-        userId,
-        result._id,
-      );
+      if (!result) throw new InternalServerErrorException();
 
-      return BookListItemDto.create(result);
+      return BookListItemDto.assign(result);
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -149,6 +177,10 @@ export class BookListItemsService extends ListItemsService<
       handleHttpRequestError(error);
     }
     return;
+  }
+
+  async delete(userId: string, listItemId: string): Promise<void> {
+    return await super.delete(userId, listItemId, ListType.Book);
   }
 
   //#region private methods

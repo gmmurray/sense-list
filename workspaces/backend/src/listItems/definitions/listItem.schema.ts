@@ -7,7 +7,7 @@ export type ListItemDocument = ListItem & Document;
 
 @Schema({ timestamps: true })
 export class ListItem {
-  @Prop({ ref: 'List' })
+  @Prop({ ref: 'List', type: Types.ObjectId })
   list: Types.ObjectId;
 
   @Prop({ required: true })

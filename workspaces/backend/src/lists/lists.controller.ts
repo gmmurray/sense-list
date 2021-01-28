@@ -12,7 +12,12 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
-import { ListApiPermissions } from 'src/authz/ApiPermissions';
+import {
+  ListApiPermissions,
+  ListItemApiPermissions,
+  UserListApiPermissions,
+  UserListItemApiPermissions,
+} from 'src/authz/ApiPermissions';
 import { AuthRequest } from 'src/authz/authzUser';
 import { Permissions } from 'src/authz/permissions.decorator';
 import { PermissionsGuard } from 'src/authz/permissions.guard';
@@ -95,12 +100,17 @@ export class ListsController {
   }
 
   /**
-   * Deletes a list. Requires list-specific user delete access
+   * Deletes a list and its related entities. Requires list-specific user delete access
    * @param id
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Delete(':id')
-  @Permissions(ListApiPermissions.delete)
+  @Permissions(
+    ListApiPermissions.delete,
+    ListItemApiPermissions.delete,
+    UserListApiPermissions.delete,
+    UserListItemApiPermissions.delete,
+  )
   async delete(
     @Req() { user }: AuthRequest,
     @Param('id') id: string,

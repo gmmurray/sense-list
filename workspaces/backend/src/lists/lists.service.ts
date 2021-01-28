@@ -1,6 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Error as MongooseError, FilterQuery, Model, Types } from 'mongoose';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotImplementedException,
+} from '@nestjs/common';
+import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import {
+  ClientSession,
+  Connection,
+  Error as MongooseError,
+  FilterQuery,
+  Model,
+  Types,
+} from 'mongoose';
 
 import { handleHttpRequestError } from 'src/common/exceptionWrappers';
 import { DataTotalResponse } from 'src/common/responseWrappers';
@@ -12,17 +24,32 @@ import {
   QueryListDto,
 } from './definitions/list.dto';
 import { cleanDtoFields } from 'src/common/dtoHelpers';
+import { ListType } from 'src/common/listType';
+import {
+  getMultiListItemPropName,
+  getSingleUserListPropName,
+} from 'src/common/mongooseTableHelpers';
+import { UserListsService } from 'src/userLists/userLists.service';
+import { AllListItemsService } from 'src/listItems/allListItems.service';
+import { ItemPushPullClause } from 'src/listItems/definitions/mongooseClauses';
 
 @Injectable()
 export class ListsService {
-  constructor(@InjectModel(List.name) private listModel: Model<ListDocument>) {}
+  constructor(
+    @InjectModel(List.name) private listModel: Model<ListDocument>,
+    @InjectConnection() private connection: Connection,
+    @Inject(forwardRef(() => AllListItemsService))
+    private readonly allListItemsService: AllListItemsService,
+    @Inject(forwardRef(() => UserListsService))
+    private readonly userListsService: UserListsService,
+  ) {}
 
   async findAll(userId: string): Promise<DataTotalResponse<ListDto>> {
     try {
       const result = await this.listModel
         .find({ ...ListsService.hasListSchemaReadAccess(userId) })
         .exec();
-      return new DataTotalResponse(result.map(doc => ListDto.create(doc)));
+      return new DataTotalResponse(result.map(doc => ListDto.assign(doc)));
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -45,7 +72,7 @@ export class ListsService {
           $and: [{ ...accessFilter }, { ...ListsService.getQueryFilter(dto) }],
         })
         .exec();
-      return new DataTotalResponse(result.map(doc => ListDto.create(doc)));
+      return new DataTotalResponse(result.map(doc => ListDto.assign(doc)));
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -61,7 +88,7 @@ export class ListsService {
 
       if (!result) throw new MongooseError.DocumentNotFoundError(null);
 
-      return ListDto.create(result);
+      return ListDto.assign(result);
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -74,7 +101,7 @@ export class ListsService {
     });
     try {
       const result = await createdList.save();
-      return ListDto.create(result);
+      return ListDto.assign(result);
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -105,43 +132,52 @@ export class ListsService {
 
   async delete(id: string, userId: string): Promise<void> {
     try {
-      const result = await this.listModel.findOneAndDelete({
-        $and: [{ _id: id, ...ListsService.hasListSchemaReadAccess(userId) }],
+      const list = await this.getListWithWriteAccess(userId, id);
+      if (!list) throw new MongooseError.DocumentNotFoundError(null);
+
+      const session = await this.connection.startSession();
+      await this.connection.transaction(async () => {
+        // Delete associated list items. Also deletes associated user list items
+        await this.allListItemsService.deleteAllItemsByList(
+          id,
+          list.type,
+          session,
+        );
+
+        // Delete associated user lists
+        await this.userListsService.deleteAllUserListsByList(id, session);
+
+        // Delete the actual list
+        const result = await this.listModel.findOneAndDelete(
+          {
+            $and: [
+              { _id: id, ...ListsService.hasListSchemaReadAccess(userId) },
+            ],
+          },
+          { session },
+        );
+        if (!result) throw new MongooseError.DocumentNotFoundError(null);
       });
-      if (!result) throw new MongooseError.DocumentNotFoundError('');
     } catch (error) {
       handleHttpRequestError(error);
     }
   }
 
-  //#region list items
+  //#region non-API methods
 
-  async getItemsByList(userId: string): Promise<ListDocument[]> {
-    try {
-      return await this.listModel
-        .find({ ...ListsService.hasListSchemaReadAccess(userId) })
-        .populate('listItem')
-        .exec();
-    } catch (error) {
-      handleHttpRequestError(error);
-    }
-  }
-
-  /**
-   * Internal/Non-API
-   *
-   * @param id
-   * @param userId
-   */
-  async getListWithItems(
-    id: string | Types.ObjectId,
+  async getListWithReadAccess(
     userId: string,
+    listId: string | Types.ObjectId,
   ): Promise<ListDocument> {
     const result = this.listModel
       .findOne({
-        $and: [{ _id: id, ...ListsService.hasListSchemaReadAccess(userId) }],
+        $and: [
+          {
+            _id: new Types.ObjectId(listId),
+            ...ListsService.hasListSchemaReadAccess(userId),
+          },
+        ],
       })
-      .populate('listItem')
       .exec();
 
     if (!result) throw new MongooseError.DocumentNotFoundError(null);
@@ -149,21 +185,19 @@ export class ListsService {
     return result;
   }
 
-  /**
-   * Internal/Non-API
-   *
-   * @param id
-   * @param userId
-   */
-  async getListWithItemsAndWriteAccess(
-    id: string | Types.ObjectId,
+  async getListWithWriteAccess(
     userId: string,
+    listId: string | Types.ObjectId,
   ): Promise<ListDocument> {
     const result = this.listModel
       .findOne({
-        $and: [{ _id: id, ...ListsService.hasListSchemaWriteAccess(userId) }],
+        $and: [
+          {
+            _id: new Types.ObjectId(listId),
+            ...ListsService.hasListSchemaWriteAccess(userId),
+          },
+        ],
       })
-      .populate('listItem')
       .exec();
 
     if (!result) throw new MongooseError.DocumentNotFoundError(null);
@@ -171,10 +205,13 @@ export class ListsService {
     return result;
   }
 
-  async addListItemToList(
+  async updateListItemsInList(
     listId: Types.ObjectId,
     userId: string,
-    listItemId: Types.ObjectId,
+    operation: '$pull' | '$push',
+    field: string,
+    value: string | Types.ObjectId,
+    session: ClientSession,
   ): Promise<void> {
     try {
       await this.listModel.updateOne(
@@ -183,31 +220,8 @@ export class ListsService {
             { _id: listId, ...ListsService.hasListSchemaWriteAccess(userId) },
           ],
         },
-        { $push: { listItems: listItemId } },
-      );
-    } catch (error) {
-      handleHttpRequestError(error);
-    }
-  }
-
-  /**
-   * Internal/Non-API
-   *
-   * @param id
-   * @param userId
-   * @param listItemId
-   */
-  async deleteListItemFromList(
-    id: Types.ObjectId,
-    userId: string,
-    listItemId: Types.ObjectId,
-  ): Promise<void> {
-    try {
-      await this.listModel.updateOne(
-        {
-          $and: [{ _id: id, ...ListsService.hasListSchemaWriteAccess(userId) }],
-        },
-        { $pull: { listItems: listItemId } },
+        { [operation]: { [field]: value } },
+        { session },
       );
     } catch (error) {
       handleHttpRequestError(error);

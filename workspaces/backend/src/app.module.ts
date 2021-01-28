@@ -6,6 +6,7 @@ import { ListsModule } from './lists/lists.module';
 import { AuthzModule } from './authz/authz.module';
 import { OpenLibraryModule } from './openLibrary/openLibrary.module';
 import { ListItemsModule } from './listItems/listItems.module';
+import { UserListsModule } from './userLists/userLists.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { ListItemsModule } from './listItems/listItems.module';
     HttpModule,
     OpenLibraryModule,
     ListItemsModule,
+    UserListsModule,
   ],
 })
 export class AppModule {}

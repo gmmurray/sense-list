@@ -20,7 +20,7 @@ export class BookListItemDto extends ListItemDto {
     this.updatedAt = baseProperties.updatedAt;
   }
 
-  static create(doc: BookListItemDocument): BookListItemDto {
+  static assign(doc: BookListItemDocument): BookListItemDto {
     return new BookListItemDto(
       doc.isbn,
       { ...doc.meta },

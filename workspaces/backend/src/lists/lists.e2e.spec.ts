@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { ListsModule } from './lists.module';
+import { AuthzModule } from 'src/authz/authz.module';
 
 describe('Lists', () => {
   let app: INestApplication;
@@ -16,6 +17,7 @@ describe('Lists', () => {
         ConfigModule.forRoot(),
         MongooseModule.forRoot(process.env.DEV_DB_URL),
         ListsModule,
+        AuthzModule,
       ],
     })
       // .overrideProvider(ListService) // add these to mock the service implementation
@@ -29,6 +31,7 @@ describe('Lists', () => {
   it('/GET lists no query', () => {
     return request(app.getHttpServer())
       .get('/lists')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .expect(200)
       .then(res => {
         expect(res.body.data).toBeTruthy();
@@ -38,7 +41,8 @@ describe('Lists', () => {
 
   it('/GET lists with query', () => {
     return request(app.getHttpServer())
-      .get('/get?title=a')
+      .get('/lists?title=a')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .expect(res => res.status === 200 || res.status === 404)
       .then(res => {
         if (res.status === 200) {
@@ -50,18 +54,23 @@ describe('Lists', () => {
 
   it('/GET lists with invalid query', () => {
     return request(app.getHttpServer())
-      .get('/get?test=a')
+      .get('/lists?test=a')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .expect(res => res.status === 200 || res.status === 404);
   });
 
   it('/GET lists/:id valid parameter', () => {
     return request(app.getHttpServer())
       .get('/lists/6005dc3e353a3a36549a07ce')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .expect(res => res.status === 200 || res.status === 404);
   });
 
   it('/GET lists/:id invalid parameter', () => {
-    return request(app.getHttpServer()).get('/lists/123').expect(400);
+    return request(app.getHttpServer())
+      .get('/lists/123')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .expect(400);
   });
 
   it('/POST lists valid request', () => {
@@ -73,6 +82,7 @@ describe('Lists', () => {
     };
     return request(app.getHttpServer())
       .post('/lists')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .send(body)
       .expect(201)
       .then(res => {
@@ -90,6 +100,7 @@ describe('Lists', () => {
     };
     return request(app.getHttpServer())
       .post('/lists')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .send(body)
       .expect(400)
       .then(res => {
@@ -103,6 +114,7 @@ describe('Lists', () => {
     };
     return request(app.getHttpServer())
       .patch('/lists/123')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .send(body)
       .expect(res => res.status === 404);
   });
@@ -110,6 +122,7 @@ describe('Lists', () => {
   it('/DELETE lists/:id valid request', () => {
     return request(app.getHttpServer())
       .delete('/lists/123')
+      .set('authorization', process.env.TEST_ACCESS_TOKEN)
       .expect(res => res.status === 200 || res.status === 404);
   });
 

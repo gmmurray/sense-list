@@ -1,8 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { Document, Error as MongooseError, Model, Types } from 'mongoose';
+import {
+  ClientSession,
+  Connection,
+  Document,
+  Error as MongooseError,
+  Model,
+  Types,
+} from 'mongoose';
 
 import { handleHttpRequestError } from 'src/common/exceptionWrappers';
+import { ListType } from 'src/common/listType';
+import { getMultiListItemPropName } from 'src/common/mongooseTableHelpers';
 import { DataTotalResponse } from 'src/common/responseWrappers';
+import { ListDocument } from 'src/lists/definitions/list.schema';
 import { ListsService } from 'src/lists/lists.service';
 import { ListItemDocument } from './definitions/listItem.schema';
 
@@ -18,6 +28,7 @@ export abstract class ListItemsService<
 
   constructor(
     private readonly model: Model<T>,
+    private readonly dbConnection: Connection,
     private readonly listsService: ListsService,
   ) {
     for (const modelName of Object.keys(model.collection.conn.models)) {
@@ -49,29 +60,59 @@ export abstract class ListItemsService<
     patchDto: P,
   ): Promise<void>;
 
-  async delete(userId: string, listItemId: string): Promise<void> {
+  async delete(
+    userId: string,
+    listItemId: string,
+    listType: ListType,
+  ): Promise<void> {
     try {
-      const item = await this.model.findById({ _id: listItemId }).exec();
+      const item = await this.model
+        .findById({ _id: new Types.ObjectId(listItemId) })
+        .exec();
 
       if (!item) throw new MongooseError.DocumentNotFoundError('');
 
       await this.hasListItemWriteAccess(userId, item.list);
 
-      await this.listsService.deleteListItemFromList(
-        item.list,
-        userId,
-        item._id,
-      );
+      const session = await this.dbConnection.startSession();
+      await this.dbConnection.transaction(async () => {
+        await this.listsService.updateListItemsInList(
+          new Types.ObjectId(item.list),
+          userId,
+          '$pull',
+          getMultiListItemPropName(listType),
+          item._id,
+          session,
+        );
 
-      const result = await this.model.findByIdAndDelete({
-        _id: item._id,
+        // TODO: delete user list items.. add session
+        // TODO: remove user list items from user list
+
+        const result = await this.model.findByIdAndDelete(
+          {
+            _id: item._id,
+          },
+          { session },
+        );
+        if (!result) throw new MongooseError.DocumentNotFoundError('');
       });
-      if (!result) throw new MongooseError.DocumentNotFoundError('');
     } catch (error) {
       handleHttpRequestError(error);
     }
   }
 
+  //#region non api methods
+
+  async deleteAllItemsByList(
+    listId: string | Types.ObjectId,
+    session: ClientSession,
+  ): Promise<void> {
+    // TODO: also delete user list items
+    await this.model.deleteMany(
+      { list: new Types.ObjectId(listId) },
+      { session },
+    );
+  }
   /**
    * Returns true if the user has write access or throws an error
    * @param userId
@@ -80,12 +121,8 @@ export abstract class ListItemsService<
   async hasListItemWriteAccess(
     userId: string,
     listId: string | Types.ObjectId,
-  ): Promise<boolean> {
-    const result = await this.listsService.getListWithItemsAndWriteAccess(
-      listId,
-      userId,
-    );
-    return !!result;
+  ): Promise<ListDocument> {
+    return await this.listsService.getListWithWriteAccess(userId, listId);
   }
 
   /**
@@ -96,8 +133,9 @@ export abstract class ListItemsService<
   async hasListItemReadAccess(
     userId: string,
     listId: string | Types.ObjectId,
-  ): Promise<boolean> {
-    const result = await this.listsService.getListWithItems(listId, userId);
-    return !!result;
+  ): Promise<ListDocument> {
+    return await this.listsService.getListWithReadAccess(userId, listId);
   }
+
+  //#endregion
 }

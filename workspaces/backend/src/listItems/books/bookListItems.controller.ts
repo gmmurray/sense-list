@@ -15,6 +15,8 @@ import { AuthGuard } from '@nestjs/passport';
 import {
   ListApiPermissions,
   ListItemApiPermissions,
+  UserListApiPermissions,
+  UserListItemApiPermissions,
 } from 'src/authz/ApiPermissions';
 import { AuthRequest } from 'src/authz/authzUser';
 import { Permissions } from 'src/authz/permissions.decorator';
@@ -116,7 +118,12 @@ export class BookListItemsController {
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Delete(':listItemId')
-  @Permissions(ListItemApiPermissions.delete, ListApiPermissions.write)
+  @Permissions(
+    ListItemApiPermissions.delete,
+    ListApiPermissions.write,
+    UserListItemApiPermissions.delete,
+    UserListApiPermissions.write,
+  )
   async delete(
     @Req() { user }: AuthRequest,
     @Param('listItemId') listItemId: string,

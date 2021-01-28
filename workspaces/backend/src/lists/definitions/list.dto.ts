@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 
 import { ListType } from '../../common/listType';
 import { ListDocument } from './list.schema';
@@ -14,9 +15,10 @@ export class ListDto {
     public ownerId: string,
     public createdAt: Date,
     public updatedAt: Date,
+    public bookListItems: Types.ObjectId[] | BookListItemDocument[],
   ) {}
 
-  static create(doc: ListDocument): ListDto {
+  static assign(doc: ListDocument): ListDto {
     return new ListDto(
       doc._id,
       doc.isPublic,
@@ -27,6 +29,7 @@ export class ListDto {
       doc.ownerId,
       doc.createdAt,
       doc.updatedAt,
+      doc.bookListItems,
     );
   }
 }
