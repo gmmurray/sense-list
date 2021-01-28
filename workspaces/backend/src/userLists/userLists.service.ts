@@ -24,17 +24,11 @@ import {
   getMultiUserListItemPropName,
 } from 'src/common/mongooseTableHelpers';
 import { DataTotalResponse } from 'src/common/responseWrappers';
-import { BookListItem } from 'src/listItems/books/definitions/bookListItem.schema';
-import { ListItemDocument } from 'src/listItems/definitions/listItem.schema';
 import { ListDocument } from 'src/lists/definitions/list.schema';
 import { ListsService } from 'src/lists/lists.service';
 import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
 import { BULIService } from 'src/userListItems/books/buli.service';
-import {
-  UserListItem,
-  UserListItemDocument,
-} from 'src/userListItems/definitions/userListItem.schema';
-import { UserListItemsService } from 'src/userListItems/userListItem.service';
+import { UserListItemDocument } from 'src/userListItems/definitions/userListItem.schema';
 import {
   CreateUserListDto,
   PatchUserListDto,

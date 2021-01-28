@@ -7,11 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
 import { ListType } from 'src/common/listType';
-import {
-  getMultiUserListItemPropName,
-  getMultiUserListPropName,
-  getSingleListItemPropName,
-} from 'src/common/mongooseTableHelpers';
+import { getMultiUserListItemPropName } from 'src/common/mongooseTableHelpers';
 import { BULIService } from './books/buli.service';
 import {
   BookUserListItem,

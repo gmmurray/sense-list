@@ -1,9 +1,6 @@
 import { NotImplementedException } from '@nestjs/common';
 import { Document, Types } from 'mongoose';
-import { ListType } from 'src/common/listType';
 import { ListDocument } from 'src/lists/definitions/list.schema';
-import { BookUserListItem } from 'src/userListItems/books/definitions/bookUserListItem.schema';
-import { UserListItem } from 'src/userListItems/definitions/userListItem.schema';
 import { UserListDocument } from './userList.schema';
 
 export class UserListDto<T extends Document> {

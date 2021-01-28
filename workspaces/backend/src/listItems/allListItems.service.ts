@@ -4,14 +4,9 @@ import {
   Injectable,
   NotImplementedException,
 } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, Model, Types } from 'mongoose';
+import { ClientSession, Types } from 'mongoose';
 import { ListType } from 'src/common/listType';
 import { BookListItemsService } from './books/bookListItem.service';
-import {
-  BookListItem,
-  BookListItemDocument,
-} from './books/definitions/bookListItem.schema';
 
 @Injectable()
 export class AllListItemsService {
