@@ -7,6 +7,7 @@ import { AuthzModule } from './authz/authz.module';
 import { OpenLibraryModule } from './openLibrary/openLibrary.module';
 import { ListItemsModule } from './listItems/listItems.module';
 import { UserListsModule } from './userLists/userLists.module';
+import { UserListItemsModule } from './userListItems/userListItems.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserListsModule } from './userLists/userLists.module';
     OpenLibraryModule,
     ListItemsModule,
     UserListsModule,
+    UserListItemsModule,
   ],
 })
 export class AppModule {}

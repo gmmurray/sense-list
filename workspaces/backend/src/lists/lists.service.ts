@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  NotImplementedException,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import {
   ClientSession,
@@ -24,14 +19,8 @@ import {
   QueryListDto,
 } from './definitions/list.dto';
 import { cleanDtoFields } from 'src/common/dtoHelpers';
-import { ListType } from 'src/common/listType';
-import {
-  getMultiListItemPropName,
-  getSingleUserListPropName,
-} from 'src/common/mongooseTableHelpers';
 import { UserListsService } from 'src/userLists/userLists.service';
 import { AllListItemsService } from 'src/listItems/allListItems.service';
-import { ItemPushPullClause } from 'src/listItems/definitions/mongooseClauses';
 
 @Injectable()
 export class ListsService {
@@ -120,7 +109,7 @@ export class ListsService {
         })
         .exec();
 
-      if (!requestedDoc) throw new MongooseError.DocumentNotFoundError('');
+      if (!requestedDoc) throw new MongooseError.DocumentNotFoundError(null);
       for (const key in dto) {
         requestedDoc[key] = dto[key];
       }
@@ -139,6 +128,7 @@ export class ListsService {
       await this.connection.transaction(async () => {
         // Delete associated list items. Also deletes associated user list items
         await this.allListItemsService.deleteAllItemsByList(
+          userId,
           id,
           list.type,
           session,

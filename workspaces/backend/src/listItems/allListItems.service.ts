@@ -12,20 +12,13 @@ import {
   BookListItem,
   BookListItemDocument,
 } from './books/definitions/bookListItem.schema';
-import { ListItemsService } from './listItems.service';
 
 @Injectable()
 export class AllListItemsService {
   constructor(
-    @InjectModel(BookListItem.name)
-    readonly bookItems: Model<BookListItemDocument>,
     @Inject(forwardRef(() => BookListItemsService))
     private readonly bookService: BookListItemsService,
   ) {}
-
-  // add list item to list
-
-  // delete list item from list
 
   /**
    * Deletes each type of list items based on the list id.
@@ -35,6 +28,7 @@ export class AllListItemsService {
    * @param session
    */
   async deleteAllItemsByList(
+    userId: string,
     listId: string | Types.ObjectId,
     listType: ListType,
     session: ClientSession,
@@ -47,6 +41,6 @@ export class AllListItemsService {
       default:
         throw new NotImplementedException();
     }
-    await service.deleteAllItemsByList(listId, session);
+    await service.deleteAllItemsByList(userId, listId, session, listType);
   }
 }

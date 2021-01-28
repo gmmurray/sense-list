@@ -10,10 +10,14 @@ import {
 
 import { handleHttpRequestError } from 'src/common/exceptionWrappers';
 import { ListType } from 'src/common/listType';
-import { getMultiListItemPropName } from 'src/common/mongooseTableHelpers';
+import {
+  getMultiListItemPropName,
+  getSingleListPropName,
+} from 'src/common/mongooseTableHelpers';
 import { DataTotalResponse } from 'src/common/responseWrappers';
 import { ListDocument } from 'src/lists/definitions/list.schema';
 import { ListsService } from 'src/lists/lists.service';
+import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
 import { ListItemDocument } from './definitions/listItem.schema';
 
 @Injectable()
@@ -30,6 +34,7 @@ export abstract class ListItemsService<
     private readonly model: Model<T>,
     private readonly dbConnection: Connection,
     private readonly listsService: ListsService,
+    private readonly allUserListItemsService: AllUserListItemsService,
   ) {
     for (const modelName of Object.keys(model.collection.conn.models)) {
       if (model.collection.conn.models[modelName] === this.model) {
@@ -68,9 +73,10 @@ export abstract class ListItemsService<
     try {
       const item = await this.model
         .findById({ _id: new Types.ObjectId(listItemId) })
+        .populate(getSingleListPropName())
         .exec();
 
-      if (!item) throw new MongooseError.DocumentNotFoundError('');
+      if (!item) throw new MongooseError.DocumentNotFoundError(null);
 
       await this.hasListItemWriteAccess(userId, item.list);
 
@@ -85,8 +91,12 @@ export abstract class ListItemsService<
           session,
         );
 
-        // TODO: delete user list items.. add session
-        // TODO: remove user list items from user list
+        await this.allUserListItemsService.deleteAllUserItemsBySingleListItem(
+          userId,
+          item._id,
+          listType,
+          session,
+        );
 
         const result = await this.model.findByIdAndDelete(
           {
@@ -94,7 +104,7 @@ export abstract class ListItemsService<
           },
           { session },
         );
-        if (!result) throw new MongooseError.DocumentNotFoundError('');
+        if (!result) throw new MongooseError.DocumentNotFoundError(null);
       });
     } catch (error) {
       handleHttpRequestError(error);
@@ -104,10 +114,18 @@ export abstract class ListItemsService<
   //#region non api methods
 
   async deleteAllItemsByList(
+    userId: string,
     listId: string | Types.ObjectId,
     session: ClientSession,
+    listType: ListType,
+    itemIds: Types.ObjectId[],
   ): Promise<void> {
-    // TODO: also delete user list items
+    await this.allUserListItemsService.deleteAllUserItemsByListItems(
+      userId,
+      itemIds,
+      listType,
+      session,
+    );
     await this.model.deleteMany(
       { list: new Types.ObjectId(listId) },
       { session },

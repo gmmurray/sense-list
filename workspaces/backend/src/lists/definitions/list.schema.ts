@@ -36,7 +36,7 @@ export class List {
   updatedAt: Date;
 
   @Prop({ ref: 'bookListItems', type: [Types.ObjectId] })
-  bookListItems: BookListItemDocument[];
+  bookListItems: BookListItemDocument[] | Types.ObjectId[];
 }
 
 export const ListSchema = SchemaFactory.createForClass(List);

@@ -3,7 +3,7 @@ import { Document, Types } from 'mongoose';
 
 import { BookReadingStatus } from 'src/common/userListItemStatus';
 import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
-import { UserListItem } from '../userListItem.schema';
+import { UserListItem } from '../../definitions/userListItem.schema';
 
 export type BookUserListItemDocument = BookUserListItem &
   UserListItem &

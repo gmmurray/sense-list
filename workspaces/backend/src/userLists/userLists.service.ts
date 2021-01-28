@@ -25,9 +25,16 @@ import {
 } from 'src/common/mongooseTableHelpers';
 import { DataTotalResponse } from 'src/common/responseWrappers';
 import { BookListItem } from 'src/listItems/books/definitions/bookListItem.schema';
+import { ListItemDocument } from 'src/listItems/definitions/listItem.schema';
 import { ListDocument } from 'src/lists/definitions/list.schema';
 import { ListsService } from 'src/lists/lists.service';
-import { UserListItem } from 'src/userListItems/definitions/userListItem.schema';
+import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
+import { BULIService } from 'src/userListItems/books/buli.service';
+import {
+  UserListItem,
+  UserListItemDocument,
+} from 'src/userListItems/definitions/userListItem.schema';
+import { UserListItemsService } from 'src/userListItems/userListItem.service';
 import {
   CreateUserListDto,
   PatchUserListDto,
@@ -42,6 +49,10 @@ export class UserListsService {
     @InjectConnection() private connection: Connection,
     @Inject(forwardRef(() => ListsService))
     private readonly listsService: ListsService,
+    @Inject(forwardRef(() => BULIService))
+    private readonly bookUserListItemsService: BULIService,
+    @Inject(forwardRef(() => AllUserListItemsService))
+    private readonly allUserListItemsService: AllUserListItemsService,
   ) {}
 
   async findAll(userId: string): Promise<DataTotalResponse<UserListDto<any>>> {
@@ -78,7 +89,6 @@ export class UserListsService {
         <Types.ObjectId>listId,
       );
 
-      // retrieve the full userlist
       const fullUserList = await shallowUserList
         .populate({
           path: getSingleListPropName(),
@@ -87,26 +97,19 @@ export class UserListsService {
             model: getListItemModelName(authorizedList.type),
           },
         })
-        // .populate({ TODO:
-        //   path: getUserListItemPopulate(authorizedList.type),
-        //   model: getUserListItemModelName(authorizedList.type),
-        //   match: { userId }
-        // })
+        .populate({
+          path: getMultiUserListItemPropName(authorizedList.type),
+          model: getUserListItemModelName(authorizedList.type),
+          match: { userId },
+        })
         .execPopulate();
-      //
 
-      /**
-       * Retrieve list + list.listitems
-       *
-       * Retrieve user list items where they match current user
-       */
       return UserListDto.assign(fullUserList);
     } catch (error) {
       handleHttpRequestError(error);
     }
   }
 
-  // should also initialize the relevant user list items based on the list's items and the list type
   async create(
     userId: string,
     createDto: CreateUserListDto,
@@ -115,34 +118,55 @@ export class UserListsService {
       const list = await this.hasListReadAccess(userId, createDto.list);
       if (!list) throw new MongooseError.ValidationError(null);
 
-      // TODO: create user list items for the list
-      let listItems = [];
+      let listItems: Types.ObjectId[];
       switch (list.type) {
         case ListType.Book:
-          listItems = list.bookListItems;
+          listItems = <Types.ObjectId[]>list.bookListItems;
           break;
         default:
           throw new NotImplementedException();
       }
-      for (const item in listItems) {
-        // create the item --maybe bulk creation
-      }
-
       createDto.userId = userId;
-      const created = new this.model({
-        ...createDto,
-        list: new Types.ObjectId(createDto.list),
+
+      const session = await this.connection.startSession();
+      let result: UserListDocument | undefined;
+      let createdUserItems: UserListItemDocument[] | undefined;
+      await this.connection.transaction(async () => {
+        const created = new this.model({
+          ...createDto,
+          list: new Types.ObjectId(createDto.list),
+        });
+
+        result = await created.save({ session });
+
+        createdUserItems = await this.bookUserListItemsService.createDefaultItemsForList(
+          userId,
+          result._id,
+          listItems,
+          session,
+        );
+
+        await this.updateItemsInUserList(
+          userId,
+          result._id,
+          '$push',
+          getMultiUserListItemPropName(list.type),
+          {
+            $each: [
+              ...createdUserItems.map(item => new Types.ObjectId(item._id)),
+            ],
+          },
+          session,
+        );
       });
 
-      const result = await created.save();
+      if (!result) throw new InternalServerErrorException();
       return UserListDto.assign(result);
     } catch (error) {
       handleHttpRequestError(error);
     }
-    return;
   }
 
-  // patch fields
   async patch(
     userId: string,
     userListId: string,
@@ -168,13 +192,15 @@ export class UserListsService {
     return;
   }
 
-  // delete user list
   async delete(
     userId: string,
     userListId: string | Types.ObjectId,
   ): Promise<void> {
     try {
-      const userList = await this.model.findById(userListId).exec();
+      const userList = await this.model
+        .findById(userListId)
+        .populate(getSingleListPropName())
+        .exec();
 
       if (
         !userList ||
@@ -184,9 +210,13 @@ export class UserListsService {
 
       const session = await this.connection.startSession();
       await this.connection.transaction(async () => {
-        // TODO: Remove associated user list items
+        const list = <ListDocument>userList.list;
+        await this.allUserListItemsService.deleteAllUserItemsByUserList(
+          userListId,
+          list.type,
+          session,
+        );
 
-        // Remove user list
         const result = await this.model.findByIdAndDelete(
           new Types.ObjectId(userListId),
           { session },
@@ -200,13 +230,16 @@ export class UserListsService {
 
   //#region non API methods
 
-  // update user list item field (follow list example ) TODO:
   async updateItemsInUserList(
     userId: string,
     userListId: string | Types.ObjectId,
     operation: '$pull' | '$push',
     field: string,
-    value: string | Types.ObjectId | { $in: string[] | Types.ObjectId[] },
+    value:
+      | string
+      | Types.ObjectId
+      | { $in: string[] | Types.ObjectId[] }
+      | { $each: string[] | Types.ObjectId[] },
     session: ClientSession,
   ): Promise<void> {
     try {
@@ -221,6 +254,31 @@ export class UserListsService {
       handleHttpRequestError(error);
     }
   }
+
+  async updateItemsInAllUserLists(
+    userId: string,
+    operation: '$pull' | '$push',
+    field: string,
+    value:
+      | string
+      | Types.ObjectId
+      | { $in: string[] | Types.ObjectId[] }
+      | { $each: string[] | Types.ObjectId[] },
+    session: ClientSession,
+  ): Promise<void> {
+    try {
+      await this.model.updateOne(
+        { userId },
+        {
+          [operation]: { [field]: value },
+        },
+        { session },
+      );
+    } catch (error) {
+      handleHttpRequestError(error);
+    }
+  }
+
   async deleteAllUserListsByList(
     listId: string | Types.ObjectId,
     session: ClientSession,
@@ -229,6 +287,16 @@ export class UserListsService {
       { list: new Types.ObjectId(listId) },
       { session },
     );
+  }
+
+  /**
+   * Finds a user list by its ID. No auth done in this method.
+   * @param userListId
+   */
+  async findUserListById(
+    userListId: string | Types.ObjectId,
+  ): Promise<UserListDocument> {
+    return await this.model.findById(new Types.ObjectId(userListId));
   }
 
   async hasListReadAccess(

@@ -20,7 +20,7 @@ export class UserList {
   notes: string;
 
   @Prop({ type: [Types.ObjectId], ref: 'BookUserListItem' })
-  bookUserListItems: BookListItemDocument[];
+  bookUserListItems: BookListItemDocument[] | Types.ObjectId[];
 
   @Prop()
   createdAt: Date;

@@ -1,7 +1,7 @@
 import { NotImplementedException } from '@nestjs/common';
 import { BookListItem } from 'src/listItems/books/definitions/bookListItem.schema';
 import { List } from 'src/lists/definitions/list.schema';
-import { BookUserListItem } from 'src/userListItems/definitions/bookUserListItem/bookUserListItem.schema';
+import { BookUserListItem } from 'src/userListItems/books/definitions/bookUserListItem.schema';
 import { UserList } from 'src/userLists/definitions/userList.schema';
 import { ListType } from './listType';
 
@@ -31,7 +31,7 @@ export const getMultiListItemPropName = (type: ListType): string => {
 export const getSingleListItemPropName = (type: ListType): string => {
   switch (type) {
     case ListType.Book:
-      return bookListItemCollectionName;
+      return bookListItemEntityName;
     default:
       throw new NotImplementedException();
   }

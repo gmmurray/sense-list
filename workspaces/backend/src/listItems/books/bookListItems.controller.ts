@@ -30,7 +30,7 @@ import {
   QueryBookListItemDto,
 } from './definitions/bookListItem.dto';
 
-@Controller('list-items/books')
+@Controller('books/list-items')
 export class BookListItemsController {
   constructor(private readonly bookListItemsService: BookListItemsService) {}
 

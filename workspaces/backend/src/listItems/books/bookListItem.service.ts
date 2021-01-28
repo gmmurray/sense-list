@@ -1,5 +1,6 @@
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import {
+  ClientSession,
   Connection,
   Error as MongooseError,
   FilterQuery,
@@ -27,6 +28,7 @@ import { cleanDtoFields } from 'src/common/dtoHelpers';
 import { ListType } from 'src/common/listType';
 import { getMultiListItemPropName } from 'src/common/mongooseTableHelpers';
 import { InternalServerErrorException } from '@nestjs/common';
+import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
 
 export class BookListItemsService extends ListItemsService<
   BookListItemDocument,
@@ -41,8 +43,9 @@ export class BookListItemsService extends ListItemsService<
     @InjectConnection() private connection: Connection,
     readonly listService: ListsService,
     readonly openLibraryService: OpenLibraryService,
+    readonly allUserListItemService: AllUserListItemsService,
   ) {
-    super(bookListItemsModel, connection, listService);
+    super(bookListItemsModel, connection, listService, allUserListItemService);
   }
 
   async findAll(
@@ -165,7 +168,7 @@ export class BookListItemsService extends ListItemsService<
         .findById(listItemId)
         .exec();
 
-      if (!requestedDoc) throw new MongooseError.DocumentNotFoundError('');
+      if (!requestedDoc) throw new MongooseError.DocumentNotFoundError(null);
 
       await this.hasListItemWriteAccess(userId, requestedDoc.list);
 
@@ -181,6 +184,19 @@ export class BookListItemsService extends ListItemsService<
 
   async delete(userId: string, listItemId: string): Promise<void> {
     return await super.delete(userId, listItemId, ListType.Book);
+  }
+
+  async deleteAllItemsByList(
+    userId: string,
+    listId: string | Types.ObjectId,
+    session: ClientSession,
+    listType: ListType,
+  ): Promise<void> {
+    const items = await this.bookListItemsModel
+      .find({ list: new Types.ObjectId(listId) }, null, { session })
+      .exec();
+    const itemIds = items.map(item => item._id);
+    super.deleteAllItemsByList(userId, listId, session, listType, itemIds);
   }
 
   //#region private methods

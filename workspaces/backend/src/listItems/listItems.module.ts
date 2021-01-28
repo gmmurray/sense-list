@@ -10,6 +10,7 @@ import { BookListItemsService } from './books/bookListItem.service';
 import { BookListItemsController } from './books/bookListItems.controller';
 import { OpenLibraryModule } from '../openLibrary/openLibrary.module';
 import { AllListItemsService } from './allListItems.service';
+import { UserListItemsModule } from '../userListItems/userListItems.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AllListItemsService } from './allListItems.service';
     ]),
     forwardRef(() => ListsModule),
     OpenLibraryModule,
+    UserListItemsModule,
   ],
   controllers: [BookListItemsController],
   providers: [BookListItemsService, AllListItemsService],
