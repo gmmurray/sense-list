@@ -1,12 +1,13 @@
 import { NotImplementedException } from '@nestjs/common';
 import { Document, Types } from 'mongoose';
+import { ListDto } from 'src/lists/definitions/list.dto';
 import { ListDocument } from 'src/lists/definitions/list.schema';
 import { UserListDocument } from './userList.schema';
 
 export class UserListDto<T extends Document> {
   constructor(
     public id: Types.ObjectId,
-    public list: string | Types.ObjectId | ListDocument,
+    public list: string | Types.ObjectId | ListDocument | ListDto,
     public userId: string,
     public notes: string,
     public userListItems: Types.ObjectId[] | T[],
@@ -20,6 +21,22 @@ export class UserListDto<T extends Document> {
       return new UserListDto(
         doc._id,
         doc.list,
+        doc.userId,
+        doc.notes,
+        doc.bookUserListItems,
+        doc.createdAt,
+        doc.updatedAt,
+      );
+    } else {
+      throw new NotImplementedException();
+    }
+  }
+  static assignWithPopulatedDocuments(doc: UserListDocument) {
+    if (true || (doc.bookUserListItems && doc.bookUserListItems.length)) {
+      //TODO: remove "true"
+      return new UserListDto(
+        doc._id,
+        ListDto.assign(<ListDocument>doc.list),
         doc.userId,
         doc.notes,
         doc.bookUserListItems,

@@ -98,7 +98,7 @@ export class UserListsService {
         })
         .execPopulate();
 
-      return UserListDto.assign(fullUserList);
+      return UserListDto.assignWithPopulatedDocuments(fullUserList);
     } catch (error) {
       handleHttpRequestError(error);
     }

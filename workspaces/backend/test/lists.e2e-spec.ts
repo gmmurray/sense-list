@@ -1,8 +1,7 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { HttpModule, HttpService, INestApplication } from '@nestjs/common';
+import { HttpService, INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
 
 import { ListsModule } from '../src/lists/lists.module';
 import { AuthzModule } from 'src/authz/authz.module';
