@@ -42,33 +42,38 @@ export class BookListItemsController {
    * @param query
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  @Get(':listId')
+  @Get()
   @Permissions(ListItemApiPermissions.read)
   async index(
     @Req() { user }: AuthRequest,
-    @Param('listId') listId: string,
     @Query() query?: QueryBookListItemDto,
   ): Promise<DataTotalResponse<BookListItemDto>> {
     const userId = user.sub;
-    if (Object.keys(query).length) {
+    if (Object.keys(query).length > 1) {
       return this.bookListItemsService.findByQuery(
         userId,
-        listId,
+        query.list,
         new QueryBookListItemDto(query),
       );
     }
-    return await this.bookListItemsService.findAll(userId, listId);
+    return await this.bookListItemsService.findAll(userId, query.list);
   }
 
+  /**
+   * Gets accessible book list item by id. Requires list-sepcific user read access
+   *
+   * @param user - provided by access token
+   * @param listItemId
+   */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  @Get()
+  @Get(':listItemId')
   @Permissions(ListItemApiPermissions.read)
   async getById(
     @Req() { user }: AuthRequest,
-    @Query() query: { listItemId: string },
+    @Param('listItemId') listItemId: string,
   ): Promise<BookListItemDto> {
     const userId = user.sub;
-    return await this.bookListItemsService.findById(userId, query.listItemId);
+    return await this.bookListItemsService.findById(userId, listItemId);
   }
 
   /**

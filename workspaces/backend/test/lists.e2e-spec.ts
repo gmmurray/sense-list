@@ -1,21 +1,27 @@
 import * as request from 'supertest';
 import { Test } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpModule, HttpService, INestApplication } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { ListsModule } from './lists.module';
+import { ListsModule } from '../src/lists/lists.module';
 import { AuthzModule } from 'src/authz/authz.module';
+import {
+  closeInMongodConnection,
+  rootMongooseTestModule,
+} from './mongoose-test.module';
 
 describe('Lists', () => {
   let app: INestApplication;
+  let accessToken;
   // let listService = { findall: () => ['test'] };
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot(),
-        MongooseModule.forRoot(process.env.DEV_DB_URL),
+        rootMongooseTestModule(),
+        //MongooseModule.forRoot(process.env.TEST_DB_URL),
         ListsModule,
         AuthzModule,
       ],
@@ -23,6 +29,13 @@ describe('Lists', () => {
       // .overrideProvider(ListService) // add these to mock the service implementation
       // .useValue(listService)
       .compile();
+    const httpService = new HttpService();
+    const token = await httpService
+      .post(process.env.AUTH0_TOKEN_URL, process.env.TEST_TOKEN_DATA, {
+        headers: { 'content-type': 'application/json' },
+      })
+      .toPromise();
+    accessToken = `Bearer ${token.data.access_token}`;
 
     app = moduleRef.createNestApplication();
     await app.init();
@@ -31,7 +44,7 @@ describe('Lists', () => {
   it('/GET lists no query', () => {
     return request(app.getHttpServer())
       .get('/lists')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .expect(200)
       .then(res => {
         expect(res.body.data).toBeTruthy();
@@ -42,7 +55,7 @@ describe('Lists', () => {
   it('/GET lists with query', () => {
     return request(app.getHttpServer())
       .get('/lists?title=a')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .expect(res => res.status === 200 || res.status === 404)
       .then(res => {
         if (res.status === 200) {
@@ -55,21 +68,21 @@ describe('Lists', () => {
   it('/GET lists with invalid query', () => {
     return request(app.getHttpServer())
       .get('/lists?test=a')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .expect(res => res.status === 200 || res.status === 404);
   });
 
   it('/GET lists/:id valid parameter', () => {
     return request(app.getHttpServer())
       .get('/lists/6005dc3e353a3a36549a07ce')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .expect(res => res.status === 200 || res.status === 404);
   });
 
   it('/GET lists/:id invalid parameter', () => {
     return request(app.getHttpServer())
       .get('/lists/123')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .expect(400);
   });
 
@@ -82,7 +95,7 @@ describe('Lists', () => {
     };
     return request(app.getHttpServer())
       .post('/lists')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .send(body)
       .expect(201)
       .then(res => {
@@ -100,7 +113,7 @@ describe('Lists', () => {
     };
     return request(app.getHttpServer())
       .post('/lists')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .send(body)
       .expect(400)
       .then(res => {
@@ -114,7 +127,7 @@ describe('Lists', () => {
     };
     return request(app.getHttpServer())
       .patch('/lists/123')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .send(body)
       .expect(res => res.status === 404);
   });
@@ -122,11 +135,12 @@ describe('Lists', () => {
   it('/DELETE lists/:id valid request', () => {
     return request(app.getHttpServer())
       .delete('/lists/123')
-      .set('authorization', process.env.TEST_ACCESS_TOKEN)
+      .set('authorization', accessToken)
       .expect(res => res.status === 200 || res.status === 404);
   });
 
   afterAll(async () => {
     await app.close();
+    await closeInMongodConnection();
   });
 });

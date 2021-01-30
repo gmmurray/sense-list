@@ -59,7 +59,6 @@ export class BookListItemsService extends ListItemsService<
       const items = await this.bookListItemsModel
         .find({ list: new Types.ObjectId(listId) })
         .exec();
-
       return new DataTotalResponse(
         items.map(doc => BookListItemDto.assign(doc)),
       );
@@ -81,7 +80,7 @@ export class BookListItemsService extends ListItemsService<
       const result = await this.bookListItemsModel
         .find({
           $and: [
-            { list: listId },
+            { list: new Types.ObjectId(listId) },
             { ...BookListItemsService.getQueryFilter(dto) },
           ],
         })

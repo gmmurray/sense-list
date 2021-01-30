@@ -159,7 +159,7 @@ export class ListsService {
     userId: string,
     listId: string | Types.ObjectId,
   ): Promise<ListDocument> {
-    const result = this.listModel
+    const result = await this.listModel
       .findOne({
         $and: [
           {

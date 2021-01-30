@@ -37,6 +37,7 @@ export class BookListItemDto extends ListItemDto {
 }
 
 export class QueryBookListItemDto {
+  public list?: string;
   public ordinal?: number;
   public listType?: ListType;
   public title?: string;
