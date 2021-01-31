@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
-import { Error as MongooseError } from 'mongoose';
+import { Error as MongooseError, isValidObjectId, Types } from 'mongoose';
 
 export const internalServerError = (error): HttpException => {
   return new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -46,7 +46,6 @@ export const invalidValuesError = (): HttpException => {
 };
 
 export const handleHttpRequestError = (err): HttpException => {
-  // console.log(err);
   switch (err.name) {
     case MongooseError.ValidationError.name:
       throw mongooseValidationError(err);
@@ -57,4 +56,8 @@ export const handleHttpRequestError = (err): HttpException => {
     default:
       throw internalServerError(err);
   }
+};
+
+export const validateObjectId = (id: string | Types.ObjectId) => {
+  if (!isValidObjectId(id)) throw new MongooseError.CastError(null);
 };

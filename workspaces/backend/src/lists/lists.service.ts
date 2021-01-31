@@ -9,7 +9,10 @@ import {
   Types,
 } from 'mongoose';
 
-import { handleHttpRequestError } from 'src/common/exceptionWrappers';
+import {
+  handleHttpRequestError,
+  validateObjectId,
+} from 'src/common/exceptionWrappers';
 import { DataTotalResponse } from 'src/common/responseWrappers';
 import { List, ListDocument } from './definitions/list.schema';
 import {
@@ -67,11 +70,14 @@ export class ListsService {
     }
   }
 
-  async findById(id: string, userId: string): Promise<ListDto> {
+  async findById(listId: string, userId: string): Promise<ListDto> {
     try {
+      validateObjectId(listId);
       const result = await this.listModel
         .findOne({
-          $and: [{ _id: id, ...ListsService.hasListSchemaReadAccess(userId) }],
+          $and: [
+            { _id: listId, ...ListsService.hasListSchemaReadAccess(userId) },
+          ],
         })
         .exec();
 
@@ -97,15 +103,18 @@ export class ListsService {
   }
 
   async patch(
-    id: string,
+    listId: string,
     patchListDto: PatchListDto,
     userId: string,
   ): Promise<void> {
-    const dto = cleanDtoFields(patchListDto);
     try {
+      validateObjectId(listId);
+      const dto = cleanDtoFields(patchListDto);
       const requestedDoc = await this.listModel
         .findOne({
-          $and: [{ _id: id, ...ListsService.hasListSchemaWriteAccess(userId) }],
+          $and: [
+            { _id: listId, ...ListsService.hasListSchemaWriteAccess(userId) },
+          ],
         })
         .exec();
 
@@ -119,9 +128,10 @@ export class ListsService {
     }
   }
 
-  async delete(id: string, userId: string): Promise<void> {
+  async delete(listId: string, userId: string): Promise<void> {
     try {
-      const list = await this.getListWithWriteAccess(userId, id);
+      validateObjectId(listId);
+      const list = await this.getListWithWriteAccess(userId, listId);
       if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
       const session = await this.connection.startSession();
@@ -129,19 +139,19 @@ export class ListsService {
         // Delete associated list items. Also deletes associated user list items
         await this.allListItemsService.deleteAllItemsByList(
           userId,
-          id,
+          listId,
           list.type,
           session,
         );
 
         // Delete associated user lists
-        await this.userListsService.deleteAllUserListsByList(id, session);
+        await this.userListsService.deleteAllUserListsByList(listId, session);
 
         // Delete the actual list
         const result = await this.listModel.findOneAndDelete(
           {
             $and: [
-              { _id: id, ...ListsService.hasListSchemaReadAccess(userId) },
+              { _id: listId, ...ListsService.hasListSchemaReadAccess(userId) },
             ],
           },
           { session },

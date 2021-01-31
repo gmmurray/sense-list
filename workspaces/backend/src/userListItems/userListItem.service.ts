@@ -7,6 +7,7 @@ import {
   Model,
   Types,
 } from 'mongoose';
+import { validateObjectId } from 'src/common/exceptionWrappers';
 import { ListType } from 'src/common/listType';
 import { getMultiUserListItemPropName } from 'src/common/mongooseTableHelpers';
 import { DataTotalResponse } from 'src/common/responseWrappers';
@@ -68,6 +69,7 @@ export abstract class UserListItemsService<
     listType: ListType,
   ): Promise<void> {
     try {
+      validateObjectId(userListItemId);
       const item = await this.model
         .findById({ _id: new Types.ObjectId(userListItemId) })
         .exec();

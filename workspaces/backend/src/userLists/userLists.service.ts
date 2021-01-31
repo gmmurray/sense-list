@@ -10,11 +10,15 @@ import {
   ClientSession,
   Connection,
   Error as MongooseError,
+  isValidObjectId,
   Model,
   Types,
 } from 'mongoose';
 import { cleanDtoFields } from 'src/common/dtoHelpers';
-import { handleHttpRequestError } from 'src/common/exceptionWrappers';
+import {
+  handleHttpRequestError,
+  validateObjectId,
+} from 'src/common/exceptionWrappers';
 import { ListType } from 'src/common/listType';
 import {
   getListItemModelName,
@@ -65,6 +69,7 @@ export class UserListsService {
     userListId: string,
   ): Promise<UserListDto<any>> {
     try {
+      validateObjectId(userListId);
       const shallowUserList = await this.model.findById(userListId);
 
       if (!shallowUserList) throw new MongooseError.DocumentNotFoundError(null);
@@ -109,6 +114,7 @@ export class UserListsService {
     createDto: CreateUserListDto,
   ): Promise<UserListDto<any>> {
     try {
+      validateObjectId(createDto.list);
       const list = await this.hasListReadAccess(userId, createDto.list);
       if (!list) throw new MongooseError.ValidationError(null);
 
@@ -168,6 +174,7 @@ export class UserListsService {
   ): Promise<void> {
     const dto = cleanDtoFields(patchDto);
     try {
+      validateObjectId(userListId);
       const requestedDoc = await this.model.findById(userListId).exec();
 
       if (
@@ -191,6 +198,7 @@ export class UserListsService {
     userListId: string | Types.ObjectId,
   ): Promise<void> {
     try {
+      validateObjectId(userListId);
       const userList = await this.model
         .findById(userListId)
         .populate(getSingleListPropName())

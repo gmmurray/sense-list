@@ -13,15 +13,23 @@ import { ListItemsModule } from 'src/listItems/listItems.module';
 import { OpenLibraryModule } from 'src/openLibrary/openLibrary.module';
 import { UserListsModule } from 'src/userLists/userLists.module';
 import { UserListItemsModule } from 'src/userListItems/userListItems.module';
-import { createList, createUserList } from './mock/createDtos';
+import {
+  createBookListItem,
+  createBULI,
+  createList,
+  createUserList,
+} from './mock/createDtos';
+import { BookReadingStatus } from 'src/common/userListItemStatus';
 
-const BASE_URL = '/user-lists';
+const BASE_URL = '/books/user-list-items';
 
-describe('User Lists', () => {
+describe('Book User List Items', () => {
   let app: INestApplication;
   let accessToken;
   let list;
+  let bookListItem;
   let userList;
+  let buli;
   // let listService = { findall: () => ['test'] }; --service mocking
 
   beforeAll(async () => {
@@ -56,15 +64,31 @@ describe('User Lists', () => {
       .post('/lists')
       .set('authorization', accessToken)
       .send(createList)
-      .then(res => {
+      .then(async res => {
         list = res.body;
+        await request(app.getHttpServer())
+          .post('/books/list-items')
+          .set('authorization', accessToken)
+          .send({ ...createBookListItem, list: list.id })
+          .then(res => {
+            bookListItem = res.body;
+          });
+
+        await request(app.getHttpServer())
+          .post('/user-lists')
+          .set('authorization', accessToken)
+          .send({ ...createUserList, list: list.id })
+          .then(res => {
+            userList = res.body;
+          });
       });
   });
 
-  it('/POST user list valid request', async () => {
+  it('/POST BULI valid request', async () => {
     const body = {
-      ...createUserList,
-      list: list.id,
+      ...createBULI,
+      userList: userList.id,
+      bookListItem: bookListItem.id,
     };
     return request(app.getHttpServer())
       .post(BASE_URL)
@@ -72,65 +96,96 @@ describe('User Lists', () => {
       .send(body)
       .expect(201)
       .then(res => {
-        userList = res.body;
+        buli = res.body;
       });
   });
 
-  it('/GET user lists', async () => {
+  it('/GET BULI', async () => {
     return request(app.getHttpServer())
       .get(`${BASE_URL}`)
       .set('authorization', accessToken)
       .expect(200)
       .then(res => {
-        expect(res.body.data).toBeTruthy();
-        expect(res.body.total).toBe(1);
-        expect(res.body.data[0].id).toEqual(userList.id);
+        const { data } = res.body;
+        expect(data).toBeTruthy();
+        const dataIncludesCreatedValue = data.some(dto => dto.id === buli.id);
+        expect(dataIncludesCreatedValue).toBeTruthy();
       });
   });
 
-  it('/GET populated user list invalid', async () => {
+  it('/GET BULI by user list id invalid', async () => {
     return request(app.getHttpServer())
-      .get(`${BASE_URL}/123`)
+      .get(`${BASE_URL}?userListId=123`)
       .set('authorization', accessToken)
-      .expect(400);
+      .expect(400 || 404);
   });
 
-  it('/GET populated user list valid', async () => {
+  it('/GET BULI by user list id valid', async () => {
     return request(app.getHttpServer())
-      .get(`${BASE_URL}/${userList.id}`)
+      .get(`${BASE_URL}?userListId=${userList.id}`)
+      .set('authorization', accessToken)
+      .expect(200)
+      .then(res => {
+        const { data } = res.body;
+        expect(data).toBeTruthy();
+        const dataIncludesCreatedValue = data.some(dto => dto.id === buli.id);
+        expect(dataIncludesCreatedValue).toBeTruthy();
+      });
+  });
+
+  it('/GET BULI by id valid', async () => {
+    return request(app.getHttpServer())
+      .get(`${BASE_URL}/${buli.id}`)
       .set('authorization', accessToken)
       .expect(200)
       .then(res => {
         expect(res.body).toBeTruthy();
-        const resultUserList = res.body;
-        expect(resultUserList?.id).toEqual(userList.id);
-        expect(resultUserList.list.id).toEqual(list.id);
+        const resultBULI = res.body;
+        expect(resultBULI?.id).toEqual(buli.id);
+        expect(resultBULI.bookListItem.id).toEqual(bookListItem.id);
+        expect(resultBULI.userList.id).toEqual(userList.id);
       });
   });
 
-  it('/PATCH user list', async () => {
+  it('/GET BULI by id invalid', async () => {
+    return request(app.getHttpServer())
+      .get(`${BASE_URL}/123`)
+      .set('authorization', accessToken)
+      .expect(400 || 404);
+  });
+
+  it('/PATCH BULI', async () => {
     const body = {
       notes: 'updated notes',
+      status: BookReadingStatus.completed,
+      owned: false,
     };
     await request(app.getHttpServer())
-      .patch(`${BASE_URL}/${userList.id}`)
+      .patch(`${BASE_URL}/${buli.id}`)
       .set('authorization', accessToken)
       .send(body)
       .expect(200);
 
     const result = await request(app.getHttpServer())
-      .get(`${BASE_URL}/${userList.id}`)
+      .get(`${BASE_URL}/${buli.id}`)
       .set('authorization', accessToken);
 
-    expect(result.body.id).toEqual(userList.id);
+    expect(result.body.id).toEqual(buli.id);
     expect(result.body.notes).toEqual(body.notes);
+    expect(result.body.status).toEqual(body.status);
+    expect(result.body.owned).toEqual(body.owned);
   });
 
-  it('/DELETE user list', async () => {
-    return request(app.getHttpServer())
-      .delete(`${BASE_URL}/${userList.id}`)
+  it('/DELETE BULI', async () => {
+    await request(app.getHttpServer())
+      .delete(`${BASE_URL}/${buli.id}`)
       .set('authorization', accessToken)
       .expect(200);
+
+    return request(app.getHttpServer())
+      .get(`${BASE_URL}/${buli.id}`)
+      .set('authorization', accessToken)
+      .expect(404);
   });
 
   afterAll(async () => {

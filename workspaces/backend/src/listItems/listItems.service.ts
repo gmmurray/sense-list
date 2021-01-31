@@ -8,7 +8,10 @@ import {
   Types,
 } from 'mongoose';
 
-import { handleHttpRequestError } from 'src/common/exceptionWrappers';
+import {
+  handleHttpRequestError,
+  validateObjectId,
+} from 'src/common/exceptionWrappers';
 import { ListType } from 'src/common/listType';
 import {
   getMultiListItemPropName,
@@ -71,6 +74,7 @@ export abstract class ListItemsService<
     listType: ListType,
   ): Promise<void> {
     try {
+      validateObjectId(listItemId);
       const item = await this.model
         .findById({ _id: new Types.ObjectId(listItemId) })
         .populate(getSingleListPropName())
@@ -78,12 +82,12 @@ export abstract class ListItemsService<
 
       if (!item) throw new MongooseError.DocumentNotFoundError(null);
 
-      await this.hasListItemWriteAccess(userId, item.list);
+      await this.hasListItemWriteAccess(userId, (<ListDocument>item.list)._id);
 
       const session = await this.dbConnection.startSession();
       await this.dbConnection.transaction(async () => {
         await this.listsService.updateListItemsInList(
-          new Types.ObjectId(item.list),
+          new Types.ObjectId((<ListDocument>item.list)._id),
           userId,
           '$pull',
           getMultiListItemPropName(listType),

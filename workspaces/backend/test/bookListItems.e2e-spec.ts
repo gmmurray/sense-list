@@ -17,7 +17,7 @@ import { createBookListItem, createList } from './mock/createDtos';
 
 const BASE_URL = '/books/list-items';
 
-describe('Lists', () => {
+describe('Book List Items', () => {
   let app: INestApplication;
   let accessToken;
   let list;

@@ -12,7 +12,10 @@ import {
   Types,
 } from 'mongoose';
 import { cleanDtoFields } from 'src/common/dtoHelpers';
-import { handleHttpRequestError } from 'src/common/exceptionWrappers';
+import {
+  handleHttpRequestError,
+  validateObjectId,
+} from 'src/common/exceptionWrappers';
 import { ListType } from 'src/common/listType';
 import {
   getListItemModelName,
@@ -63,6 +66,7 @@ export class BULIService extends UserListItemsService<
     userListId: string | Types.ObjectId,
   ): Promise<DataTotalResponse<BULIDto>> {
     try {
+      validateObjectId(userListId);
       const userList = await this.userListService.findUserListById(userListId);
 
       if (!userList || userList.userId !== userId)
@@ -83,7 +87,9 @@ export class BULIService extends UserListItemsService<
 
       if (!items) throw new MongooseError.DocumentNotFoundError(null);
 
-      return new DataTotalResponse(items.map(doc => BULIDto.assign(doc)));
+      return new DataTotalResponse(
+        items.map(doc => BULIDto.assignWithPopulatedDocuments(doc)),
+      );
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -94,6 +100,7 @@ export class BULIService extends UserListItemsService<
     userListItemId: string | Types.ObjectId,
   ): Promise<BULIDto> {
     try {
+      validateObjectId(userListItemId);
       const result = await this.bookModel
         .findOne({
           $and: [{ _id: new Types.ObjectId(userListItemId) }, { userId }],
@@ -109,7 +116,7 @@ export class BULIService extends UserListItemsService<
 
       if (!result) throw new MongooseError.DocumentNotFoundError(null);
 
-      return BULIDto.assign(result);
+      return BULIDto.assignWithPopulatedDocuments(result);
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -117,6 +124,8 @@ export class BULIService extends UserListItemsService<
 
   async create(userId: string, createDto: CreateBULIDto): Promise<BULIDto> {
     try {
+      validateObjectId(createDto.bookListItem);
+      validateObjectId(createDto.userList);
       const userList = await this.userListService.findUserListById(
         createDto.userList,
       );
@@ -128,8 +137,10 @@ export class BULIService extends UserListItemsService<
       let result: BookUserListItemDocument | undefined;
       await this.connection.transaction(async () => {
         const created = new this.bookModel({
-          userId,
           ...createDto,
+          userId,
+          userList: new Types.ObjectId(createDto.userList),
+          bookListItem: new Types.ObjectId(createDto.bookListItem),
         });
 
         result = await created.save({ session });
@@ -146,7 +157,8 @@ export class BULIService extends UserListItemsService<
 
       if (!result) throw new InternalServerErrorException();
 
-      return BULIDto.assign(result);
+      const test = BULIDto.assign(result);
+      return test;
     } catch (error) {
       handleHttpRequestError(error);
     }
@@ -176,8 +188,9 @@ export class BULIService extends UserListItemsService<
     buliId: string | Types.ObjectId,
     patchDto: PatchBULIDto,
   ): Promise<void> {
-    const dto = cleanDtoFields(patchDto);
     try {
+      validateObjectId(buliId);
+      const dto = cleanDtoFields(patchDto);
       const requestedDoc = await this.bookModel
         .findOne({ $and: [{ userId }, { _id: buliId }] })
         .exec();
@@ -192,6 +205,13 @@ export class BULIService extends UserListItemsService<
     } catch (error) {
       handleHttpRequestError(error);
     }
+  }
+
+  async delete(
+    userId: string,
+    userListItemId: string | Types.ObjectId,
+  ): Promise<void> {
+    return await super.delete(userId, userListItemId, ListType.Book);
   }
 
   async findAllBySingleListItem(

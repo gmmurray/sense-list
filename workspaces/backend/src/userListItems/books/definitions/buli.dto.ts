@@ -1,12 +1,18 @@
 import { Types } from 'mongoose';
 import { BookReadingStatus } from 'src/common/userListItemStatus';
+import { BookListItemDto } from 'src/listItems/books/definitions/bookListItem.dto';
 import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 import { UserListItemDto } from 'src/userListItems/definitions/userListItem.dto';
+import { UserListDto } from 'src/userLists/definitions/userList.dto';
+import { UserListDocument } from 'src/userLists/definitions/userList.schema';
 import { BookUserListItemDocument } from './bookUserListItem.schema';
 
 export class BULIDto extends UserListItemDto {
   constructor(
-    public bookListItem: Types.ObjectId | BookListItemDocument,
+    public bookListItem:
+      | Types.ObjectId
+      | BookListItemDocument
+      | BookListItemDto,
     public status: BookReadingStatus,
     public owned: boolean,
     baseProperties: UserListItemDto,
@@ -29,6 +35,21 @@ export class BULIDto extends UserListItemDto {
       createdAt: doc.createdAt,
       updatedAt: doc.updatedAt,
     });
+  }
+  static assignWithPopulatedDocuments(doc: BookUserListItemDocument): BULIDto {
+    return new BULIDto(
+      BookListItemDto.assign(<BookListItemDocument>doc.bookListItem),
+      doc.status,
+      doc.owned,
+      {
+        id: doc._id,
+        userList: UserListDto.assign(<UserListDocument>doc.userList),
+        userId: doc.userId,
+        notes: doc.notes,
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
+      },
+    );
   }
 }
 

@@ -22,7 +22,10 @@ import {
 import { BookListItemDomain } from './definitions/bookListItem';
 import { ListsService } from 'src/lists/lists.service';
 import { DataTotalResponse } from 'src/common/responseWrappers';
-import { handleHttpRequestError } from 'src/common/exceptionWrappers';
+import {
+  handleHttpRequestError,
+  validateObjectId,
+} from 'src/common/exceptionWrappers';
 import { OpenLibraryService } from '../../openLibrary/openLibrary.service';
 import { cleanDtoFields } from 'src/common/dtoHelpers';
 import { ListType } from 'src/common/listType';
@@ -53,6 +56,7 @@ export class BookListItemsService extends ListItemsService<
     listId: string,
   ): Promise<DataTotalResponse<BookListItemDto>> {
     try {
+      validateObjectId(listId);
       const list = await this.hasListItemReadAccess(userId, listId);
       if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
@@ -74,6 +78,7 @@ export class BookListItemsService extends ListItemsService<
   ): Promise<DataTotalResponse<BookListItemDto>> {
     const dto: QueryBookListItemDto = cleanDtoFields(queryDto);
     try {
+      validateObjectId(listId);
       const list = await this.hasListItemReadAccess(userId, listId);
       if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
@@ -96,11 +101,15 @@ export class BookListItemsService extends ListItemsService<
 
   async findById(userId: string, listItemId: string): Promise<BookListItemDto> {
     try {
+      validateObjectId(listItemId);
       const result = await this.bookListItemsModel.findById(listItemId).exec();
 
       if (!result) throw new MongooseError.DocumentNotFoundError(null);
 
-      const list = await this.hasListItemReadAccess(userId, result.list);
+      const list = await this.hasListItemReadAccess(
+        userId,
+        <Types.ObjectId>result.list,
+      );
       if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
       return BookListItemDto.assign(result);
@@ -114,6 +123,7 @@ export class BookListItemsService extends ListItemsService<
     userId: string,
   ): Promise<BookListItemDto> {
     try {
+      validateObjectId(createDto.list);
       const list = await this.hasListItemWriteAccess(userId, createDto.list);
       if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
@@ -169,7 +179,10 @@ export class BookListItemsService extends ListItemsService<
 
       if (!requestedDoc) throw new MongooseError.DocumentNotFoundError(null);
 
-      await this.hasListItemWriteAccess(userId, requestedDoc.list);
+      await this.hasListItemWriteAccess(
+        userId,
+        <Types.ObjectId>requestedDoc.list,
+      );
 
       for (const key in dto) {
         requestedDoc[key] = dto[key];

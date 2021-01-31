@@ -32,20 +32,12 @@ export class BULIController {
   @Permissions(UserListApiPermissions.read, UserListItemApiPermissions.read)
   async index(
     @Req() { user }: AuthRequest,
-  ): Promise<DataTotalResponse<BULIDto>> {
-    const userId = user.sub;
-    return await this.buliService.findAll(userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
-  @Get()
-  @Permissions(UserListApiPermissions.read, UserListItemApiPermissions.read)
-  async getByUserList(
-    @Req() { user }: AuthRequest,
     @Query() query: { userListId: string },
   ): Promise<DataTotalResponse<BULIDto>> {
     const userId = user.sub;
-    return await this.buliService.findAllByUserList(userId, query.userListId);
+    if (query.userListId) {
+      return await this.buliService.findAllByUserList(userId, query.userListId);
+    } else return await this.buliService.findAll(userId);
   }
 
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
@@ -94,6 +86,6 @@ export class BULIController {
     @Param('buliId') buliId: string,
   ): Promise<void> {
     const userId = user.sub;
-    return await this.buliService.delete(userId, buliId, ListType.Book);
+    return await this.buliService.delete(userId, buliId);
   }
 }

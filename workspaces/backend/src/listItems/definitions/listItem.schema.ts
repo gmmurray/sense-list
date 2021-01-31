@@ -2,13 +2,14 @@ import { Prop, Schema } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
 import { ListType } from 'src/common/listType';
+import { ListDocument } from 'src/lists/definitions/list.schema';
 
 export type ListItemDocument = ListItem & Document;
 
 @Schema({ timestamps: true })
 export class ListItem {
   @Prop({ ref: 'List', type: Types.ObjectId })
-  list: Types.ObjectId;
+  list: Types.ObjectId | ListDocument;
 
   @Prop({ required: true })
   ordinal: number;
