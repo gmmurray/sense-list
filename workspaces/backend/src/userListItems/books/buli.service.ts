@@ -49,6 +49,11 @@ export class BULIService extends UserListItemsService<
     super(bookModel, connection, userListService);
   }
 
+  /**
+   * Gets all accessible BULI. Requires user-specific read access
+   *
+   * @param userId
+   */
   async findAll(userId: string): Promise<DataTotalResponse<BULIDto>> {
     try {
       const items = await this.bookModel.find({ userId }).exec();
@@ -61,6 +66,12 @@ export class BULIService extends UserListItemsService<
     }
   }
 
+  /**
+   * Gets all accessible BULI by user list. Requires user-specific read access
+   *
+   * @param userId
+   * @param userListId
+   */
   async findAllByUserList(
     userId: string,
     userListId: string | Types.ObjectId,
@@ -95,6 +106,12 @@ export class BULIService extends UserListItemsService<
     }
   }
 
+  /**
+   * Gets an accessible BULI by id. Requires user-specific read access
+   *
+   * @param userId
+   * @param userListItemId
+   */
   async findById(
     userId: string,
     userListItemId: string | Types.ObjectId,
@@ -122,6 +139,12 @@ export class BULIService extends UserListItemsService<
     }
   }
 
+  /**
+   * Creates a BULI. Requires user-specific write access
+   *
+   * @param userId
+   * @param createDto
+   */
   async create(userId: string, createDto: CreateBULIDto): Promise<BULIDto> {
     try {
       validateObjectId(createDto.bookListItem);
@@ -164,25 +187,13 @@ export class BULIService extends UserListItemsService<
     }
   }
 
-  async createDefaultItemsForList(
-    userId: string,
-    userListId: string | Types.ObjectId,
-    bookListItems: Types.ObjectId[],
-    session: ClientSession,
-  ): Promise<BookUserListItemDocument[]> {
-    try {
-      const newItems = bookListItems.map(
-        listItemId =>
-          new this.bookModel({
-            ...DefaultBULI.createDefault(userId, userListId, listItemId),
-          }),
-      );
-      return await this.bookModel.insertMany(newItems, { session });
-    } catch (error) {
-      handleHttpRequestError(error);
-    }
-  }
-
+  /**
+   * Updates a BULI. Requires user-specific write access
+   *
+   * @param userId
+   * @param buliId
+   * @param patchDto
+   */
   async patch(
     userId: string,
     buliId: string | Types.ObjectId,
@@ -207,6 +218,12 @@ export class BULIService extends UserListItemsService<
     }
   }
 
+  /**
+   * Deletes an accessible BULI. Requires user-specific delete access
+   *
+   * @param userId
+   * @param userListItemId
+   */
   async delete(
     userId: string,
     userListItemId: string | Types.ObjectId,
@@ -214,6 +231,41 @@ export class BULIService extends UserListItemsService<
     return await super.delete(userId, userListItemId, ListType.Book);
   }
 
+  //#region non API methods
+
+  /**
+   * Creates a default user list item for each list item provided
+   *
+   * @param userId
+   * @param userListId
+   * @param bookListItems
+   * @param session
+   */
+  async createDefaultItemsForList(
+    userId: string,
+    userListId: string | Types.ObjectId,
+    bookListItems: Types.ObjectId[],
+    session: ClientSession,
+  ): Promise<BookUserListItemDocument[]> {
+    try {
+      const newItems = bookListItems.map(
+        listItemId =>
+          new this.bookModel({
+            ...DefaultBULI.createDefault(userId, userListId, listItemId),
+          }),
+      );
+      return await this.bookModel.insertMany(newItems, { session });
+    } catch (error) {
+      handleHttpRequestError(error);
+    }
+  }
+
+  /**
+   * Gets all of the BULI related to a specific list item
+   *
+   * @param userId
+   * @param listItemId
+   */
   async findAllBySingleListItem(
     userId: string,
     listItemId: string | Types.ObjectId,
@@ -225,6 +277,12 @@ export class BULIService extends UserListItemsService<
       .exec();
   }
 
+  /**
+   * Gets all of the BULI related to any of the given list items
+   *
+   * @param userId
+   * @param listItemIds
+   */
   async findAllByListItems(
     userId: string,
     listItemIds: Types.ObjectId[],
@@ -236,3 +294,5 @@ export class BULIService extends UserListItemsService<
       .exec();
   }
 }
+
+//#endregion

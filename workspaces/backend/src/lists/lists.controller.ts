@@ -101,6 +101,7 @@ export class ListsController {
 
   /**
    * Deletes a list and its related entities. Requires list-specific user delete access
+   *
    * @param id
    */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)

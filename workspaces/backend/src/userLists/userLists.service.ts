@@ -53,6 +53,11 @@ export class UserListsService {
     private readonly allUserListItemsService: AllUserListItemsService,
   ) {}
 
+  /**
+   * Gets all accessible user lists. Requires user-specific read access
+   *
+   * @param userId
+   */
   async findAll(userId: string): Promise<DataTotalResponse<UserListDto<any>>> {
     try {
       const result = await this.model.find({ userId }).exec();
@@ -64,6 +69,12 @@ export class UserListsService {
     return;
   }
 
+  /**
+   * Gets an accessible fully populated user list. Requires user-specific read access
+   *
+   * @param userId
+   * @param userListId
+   */
   async getPopulatedUserList(
     userId: string,
     userListId: string,
@@ -109,6 +120,12 @@ export class UserListsService {
     }
   }
 
+  /**
+   * Creates a user list. Requires user-specific write access
+   *
+   * @param userId
+   * @param createDto
+   */
   async create(
     userId: string,
     createDto: CreateUserListDto,
@@ -167,6 +184,13 @@ export class UserListsService {
     }
   }
 
+  /**
+   * Updates an accessible user list. Requires user-specific write access
+   *
+   * @param userId
+   * @param userListId
+   * @param patchDto
+   */
   async patch(
     userId: string,
     userListId: string,
@@ -193,6 +217,12 @@ export class UserListsService {
     return;
   }
 
+  /**
+   * Deletes an accessible user list. Requires user-specific write access
+   *
+   * @param userId
+   * @param userListId
+   */
   async delete(
     userId: string,
     userListId: string | Types.ObjectId,
@@ -232,6 +262,16 @@ export class UserListsService {
 
   //#region non API methods
 
+  /**
+   * Adds or removes user list items from a user list
+   *
+   * @param userId
+   * @param userListId
+   * @param operation
+   * @param field
+   * @param value
+   * @param session
+   */
   async updateItemsInUserList(
     userId: string,
     userListId: string | Types.ObjectId,
@@ -257,6 +297,15 @@ export class UserListsService {
     }
   }
 
+  /**
+   * Adds or removes user list items from all user lists
+   *
+   * @param userId
+   * @param operation
+   * @param field
+   * @param value
+   * @param session
+   */
   async updateItemsInAllUserLists(
     userId: string,
     operation: '$pull' | '$push',
@@ -281,6 +330,12 @@ export class UserListsService {
     }
   }
 
+  /**
+   * Removes all user lists that correspond to a given list
+   *
+   * @param listId
+   * @param session
+   */
   async deleteAllUserListsByList(
     listId: string | Types.ObjectId,
     session: ClientSession,
@@ -293,6 +348,7 @@ export class UserListsService {
 
   /**
    * Finds a user list by its ID. No auth done in this method.
+   *
    * @param userListId
    */
   async findUserListById(
@@ -301,6 +357,12 @@ export class UserListsService {
     return await this.model.findById(new Types.ObjectId(userListId));
   }
 
+  /**
+   * Returns the list if the user has read access to it
+   *
+   * @param userId
+   * @param listId
+   */
   async hasListReadAccess(
     userId: string,
     listId: string | Types.ObjectId,
@@ -308,6 +370,16 @@ export class UserListsService {
     return await this.listsService.getListWithReadAccess(userId, listId);
   }
 
+  //#endregion
+
+  //#region private methods
+
+  /**
+   * Returns true if the given user has write access to the given user list
+   *
+   * @param userId
+   * @param userList
+   */
   private static hasUserListWriteAccess(
     userId: string,
     userList: UserListDocument,

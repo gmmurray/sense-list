@@ -117,6 +117,16 @@ export abstract class ListItemsService<
 
   //#region non api methods
 
+  /**
+   * Deletes each type of list items based on the list id.
+   * Also deletes their associated user list items
+   *
+   * @param userId
+   * @param listId
+   * @param session
+   * @param listType
+   * @param itemIds
+   */
   async deleteAllItemsByList(
     userId: string,
     listId: string | Types.ObjectId,
@@ -135,6 +145,7 @@ export abstract class ListItemsService<
       { session },
     );
   }
+
   /**
    * Returns true if the user has write access or throws an error
    * @param userId

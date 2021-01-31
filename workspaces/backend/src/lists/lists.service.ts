@@ -36,6 +36,11 @@ export class ListsService {
     private readonly userListsService: UserListsService,
   ) {}
 
+  /**
+   * Gets all accessible lists. Requires list-specific user read access
+   *
+   * @param userId
+   */
   async findAll(userId: string): Promise<DataTotalResponse<ListDto>> {
     try {
       const result = await this.listModel
@@ -47,6 +52,12 @@ export class ListsService {
     }
   }
 
+  /**
+   * Gets all accessible lists by query. Requires list-specific user read access
+   *
+   * @param queryListDto
+   * @param userId
+   */
   async findByQuery(
     queryListDto: QueryListDto,
     userId: string,
@@ -70,6 +81,12 @@ export class ListsService {
     }
   }
 
+  /**
+   * Gets list by id. Requires list-specific user read access
+   *
+   * @param listId
+   * @param userId
+   */
   async findById(listId: string, userId: string): Promise<ListDto> {
     try {
       validateObjectId(listId);
@@ -89,6 +106,12 @@ export class ListsService {
     }
   }
 
+  /**
+   * Creates a new list. Requires general user write access
+   *
+   * @param createListDto
+   * @param userId
+   */
   async create(createListDto: CreateListDto, userId: string): Promise<ListDto> {
     const createdList = new this.listModel({
       ...createListDto,
@@ -102,6 +125,13 @@ export class ListsService {
     }
   }
 
+  /**
+   * Updates one to many available fields on a List. Requires list-specific user write access
+   *
+   * @param listId
+   * @param patchListDto
+   * @param userId
+   */
   async patch(
     listId: string,
     patchListDto: PatchListDto,
@@ -128,6 +158,12 @@ export class ListsService {
     }
   }
 
+  /**
+   * Deletes a list and its related entities. Requires list-specific user delete access
+   *
+   * @param listId
+   * @param userId
+   */
   async delete(listId: string, userId: string): Promise<void> {
     try {
       validateObjectId(listId);
@@ -163,8 +199,14 @@ export class ListsService {
     }
   }
 
-  //#region non-API methods
+  //#region non API methods
 
+  /**
+   * Returns the list if the user has read access to it, else throws an error
+   *
+   * @param userId
+   * @param listId
+   */
   async getListWithReadAccess(
     userId: string,
     listId: string | Types.ObjectId,
@@ -185,6 +227,12 @@ export class ListsService {
     return result;
   }
 
+  /**
+   * Returns the list if the user has write access to it, else throws an error
+   *
+   * @param userId
+   * @param listId
+   */
   async getListWithWriteAccess(
     userId: string,
     listId: string | Types.ObjectId,
@@ -205,6 +253,17 @@ export class ListsService {
     return result;
   }
 
+  /**
+   * Updates the listItems property of a list by adding or removing based on the given
+   * field. Uses transactions
+   *
+   * @param listId
+   * @param userId
+   * @param operation
+   * @param field
+   * @param value
+   * @param session
+   */
   async updateListItemsInList(
     listId: Types.ObjectId,
     userId: string,
@@ -231,6 +290,12 @@ export class ListsService {
   //#endregion
 
   //#region private methods
+
+  /**
+   * Transforms the query object into a mongoose query filter
+   *
+   * @param queryListDto
+   */
   private static getQueryFilter(queryListDto: QueryListDto): FilterQuery<List> {
     const result: FilterQuery<List> = {};
     if (Object.keys(queryListDto).length) {
@@ -250,14 +315,29 @@ export class ListsService {
     return result;
   }
 
+  /**
+   * Returns a mongoose query filter to check list read access
+   *
+   * @param userId
+   */
   static hasListSchemaReadAccess(userId: string): FilterQuery<List> {
     return { $or: [{ ownerId: userId }, { isPublic: true }] };
   }
 
+  /**
+   * Returns a mongoose query filter to check list write access
+   *
+   * @param userId
+   */
   static hasListSchemaWriteAccess(userId: string): FilterQuery<List> {
     return { ownerId: userId };
   }
 
+  /**
+   * Returns a mongoose query filter to check list ownership
+   *
+   * @param userId
+   */
   static isListSchemaOwner(userId: string): FilterQuery<List> {
     return { ownerId: userId };
   }

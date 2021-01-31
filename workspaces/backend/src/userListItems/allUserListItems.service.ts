@@ -22,6 +22,15 @@ export class AllUserListItemsService {
     @Inject(forwardRef(() => BULIService))
     private readonly bookService: BULIService,
   ) {}
+
+  /**
+   * Deletes all of the user list items associated with a single list item
+   *
+   * @param userId
+   * @param listItemId
+   * @param listType
+   * @param session
+   */
   async deleteAllUserItemsBySingleListItem(
     userId: string,
     listItemId: string | Types.ObjectId,
@@ -50,6 +59,14 @@ export class AllUserListItemsService {
     );
   }
 
+  /**
+   * Deletes all of the user list items associated with any of the given list items
+   *
+   * @param userId
+   * @param listItemIds
+   * @param listType
+   * @param session
+   */
   async deleteAllUserItemsByListItems(
     userId: string,
     listItemIds: Types.ObjectId[],
@@ -78,6 +95,13 @@ export class AllUserListItemsService {
     );
   }
 
+  /**
+   * Deletes all of the user list items associated with a given user list
+   *
+   * @param userListId
+   * @param listType
+   * @param session
+   */
   async deleteAllUserItemsByUserList(
     userListId: string | Types.ObjectId,
     listType: ListType,

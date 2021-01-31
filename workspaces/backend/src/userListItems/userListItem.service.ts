@@ -63,6 +63,12 @@ export abstract class UserListItemsService<
     patchDto: P,
   ): Promise<void>;
 
+  /**
+   * Deletes an accessible user list item. Requires user-specific delete access
+   * @param userId
+   * @param userListItemId
+   * @param listType
+   */
   async delete(
     userId: string,
     userListItemId: string | Types.ObjectId,
@@ -122,6 +128,12 @@ export abstract class UserListItemsService<
     listItemIds: Types.ObjectId[],
   ): Promise<UserListItemDocument[]>;
 
+  /**
+   * Deletes all of the user list items associated with a given user list
+   *
+   * @param userListId
+   * @param session
+   */
   async deleteAllUserItemsByUserList(
     userListId: string | Types.ObjectId,
     session: ClientSession,
@@ -132,6 +144,14 @@ export abstract class UserListItemsService<
     );
   }
 
+  /**
+   * Deletes an array of user list items
+   *
+   * @param userId
+   * @param userItemIds
+   * @param itemField
+   * @param session
+   */
   async deleteAllUserItemsByIds(
     userId: string,
     userItemIds: Types.ObjectId[],
@@ -150,10 +170,14 @@ export abstract class UserListItemsService<
 
   //#endregion
 
+  //#region private methods
+
   private static hasUserListItemWriteAccess(
     userId: string,
     userListItem: UserListItemDocument,
   ): boolean {
     return userListItem.userId === userId;
   }
+
+  //#endregion
 }

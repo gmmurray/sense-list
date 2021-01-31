@@ -51,6 +51,12 @@ export class BookListItemsService extends ListItemsService<
     super(bookListItemsModel, connection, listService, allUserListItemService);
   }
 
+  /**
+   * Gets all accessible book list items. Requires list-specific user read access.
+   *
+   * @param userId
+   * @param listId
+   */
   async findAll(
     userId: string,
     listId: string,
@@ -71,6 +77,13 @@ export class BookListItemsService extends ListItemsService<
     }
   }
 
+  /**
+   * Gets all accessible book list items by query. Requires list-specific user read access.
+   *
+   * @param userId
+   * @param listId
+   * @param queryDto
+   */
   async findByQuery(
     userId: string,
     listId: string,
@@ -99,6 +112,12 @@ export class BookListItemsService extends ListItemsService<
     return null;
   }
 
+  /**
+   * Gets accessible book list item by id. Requires list-sepcific user read access
+   *
+   * @param userId
+   * @param listItemId
+   */
   async findById(userId: string, listItemId: string): Promise<BookListItemDto> {
     try {
       validateObjectId(listItemId);
@@ -118,6 +137,11 @@ export class BookListItemsService extends ListItemsService<
     }
   }
 
+  /**
+   * Creates a new book list item. Requires access to the list being added to
+   * @param createDto
+   * @param userId
+   */
   async create(
     createDto: CreateBookListItemDto,
     userId: string,
@@ -166,6 +190,12 @@ export class BookListItemsService extends ListItemsService<
     }
   }
 
+  /**
+   * Updates one to many available fields on a book List item. Requires list-specific user write access
+   * @param userId
+   * @param listItemId
+   * @param patchDto
+   */
   async patch(
     userId: string,
     listItemId: string,
@@ -194,10 +224,24 @@ export class BookListItemsService extends ListItemsService<
     return;
   }
 
+  /**
+   * Deletes a book list item. Requires list-specific user delete access
+   * @param userId
+   * @param listItemId
+   */
   async delete(userId: string, listItemId: string): Promise<void> {
     return await super.delete(userId, listItemId, ListType.Book);
   }
 
+  //#region non API methods
+
+  /**
+   * Deletes all list items that correspond with a given list
+   * @param userId
+   * @param listId
+   * @param session
+   * @param listType
+   */
   async deleteAllItemsByList(
     userId: string,
     listId: string | Types.ObjectId,
@@ -211,8 +255,15 @@ export class BookListItemsService extends ListItemsService<
     super.deleteAllItemsByList(userId, listId, session, listType, itemIds);
   }
 
+  //#endregion
+
   //#region private methods
 
+  /**
+   * Transforms the query object into a mongoose query filter
+   *
+   * @param queryDto
+   */
   private static getQueryFilter(
     queryDto: QueryBookListItemDto,
   ): FilterQuery<BookListItem> {

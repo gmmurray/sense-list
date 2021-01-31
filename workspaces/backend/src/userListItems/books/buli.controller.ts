@@ -18,7 +18,6 @@ import {
 import { AuthRequest } from 'src/authz/authzUser';
 import { Permissions } from 'src/authz/permissions.decorator';
 import { PermissionsGuard } from 'src/authz/permissions.guard';
-import { ListType } from 'src/common/listType';
 import { DataTotalResponse } from 'src/common/responseWrappers';
 import { BULIService } from './buli.service';
 import { BULIDto, CreateBULIDto, PatchBULIDto } from './definitions/buli.dto';
@@ -27,6 +26,11 @@ import { BULIDto, CreateBULIDto, PatchBULIDto } from './definitions/buli.dto';
 export class BULIController {
   constructor(private readonly buliService: BULIService) {}
 
+  /**
+   * Gets all accessible BULI. Requires user-specific read access
+   *
+   * @param query
+   */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Get()
   @Permissions(UserListApiPermissions.read, UserListItemApiPermissions.read)
@@ -40,6 +44,11 @@ export class BULIController {
     } else return await this.buliService.findAll(userId);
   }
 
+  /**
+   * Gets an accessible BULI by id. Requires user-specific read access
+   *
+   * @param buliId
+   */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Get(':buliId')
   @Permissions(UserListItemApiPermissions.read)
@@ -51,6 +60,11 @@ export class BULIController {
     return await this.buliService.findById(userId, buliId);
   }
 
+  /**
+   * Creates a BULI. Requires user-specific write access
+   *
+   * @param createDto
+   */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Post()
   @Permissions(UserListApiPermissions.write, UserListItemApiPermissions.write)
@@ -62,6 +76,12 @@ export class BULIController {
     return await this.buliService.create(userId, createDto);
   }
 
+  /**
+   * Updates a BULI. Requires user-specific write access
+   *
+   * @param buliId
+   * @param updates
+   */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Patch(':buliId')
   @Permissions(UserListItemApiPermissions.write)
@@ -78,6 +98,11 @@ export class BULIController {
     );
   }
 
+  /**
+   * Deletes an accessible BULI. Requires user-specific delete access
+   *
+   * @param buliId
+   */
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @Delete(':buliId')
   @Permissions(UserListItemApiPermissions.delete)
