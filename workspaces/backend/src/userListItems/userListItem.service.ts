@@ -8,11 +8,12 @@ import {
   Types,
 } from 'mongoose';
 import { validateObjectId } from 'src/common/exceptionWrappers';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import { getMultiUserListItemPropName } from 'src/common/mongooseTableHelpers';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import { UserListsService } from 'src/userLists/userLists.service';
 import { UserListItemDocument } from './definitions/userListItem.schema';
+import { StringIdType } from 'src/common/types/stringIdType';
 
 @Injectable()
 export abstract class UserListItemsService<
@@ -40,26 +41,23 @@ export abstract class UserListItemsService<
 
   abstract findAllByUserList(
     userId: string,
-    userListId: string | Types.ObjectId,
+    userListId: StringIdType,
   ): Promise<DataTotalResponse<D>>;
 
-  abstract findById(
-    userId: string,
-    userListItemId: string | Types.ObjectId,
-  ): Promise<D>;
+  abstract findById(userId: string, userListItemId: StringIdType): Promise<D>;
 
   abstract create(userId: string, createDto: C): Promise<D>;
 
   abstract createDefaultItemsForList(
     userId: string,
-    userListId: string | Types.ObjectId,
+    userListId: StringIdType,
     listItems: Types.ObjectId[],
     session: ClientSession,
   ): Promise<UserListItemDocument[]>;
 
   abstract patch(
     userId: string,
-    userListItemId: string | Types.ObjectId,
+    userListItemId: StringIdType,
     patchDto: P,
   ): Promise<void>;
 
@@ -71,7 +69,7 @@ export abstract class UserListItemsService<
    */
   async delete(
     userId: string,
-    userListItemId: string | Types.ObjectId,
+    userListItemId: StringIdType,
     listType: ListType,
   ): Promise<void> {
     try {
@@ -120,7 +118,7 @@ export abstract class UserListItemsService<
   // #region non api methods
   abstract findAllBySingleListItem(
     userId: string,
-    listItemId: string | Types.ObjectId,
+    listItemId: StringIdType,
   ): Promise<UserListItemDocument[]>;
 
   abstract findAllByListItems(
@@ -135,7 +133,7 @@ export abstract class UserListItemsService<
    * @param session
    */
   async deleteAllUserItemsByUserList(
-    userListId: string | Types.ObjectId,
+    userListId: StringIdType,
     session: ClientSession,
   ): Promise<void> {
     await this.model.deleteMany(

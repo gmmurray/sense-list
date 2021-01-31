@@ -21,7 +21,7 @@ import {
 import { AuthRequest } from 'src/authz/authzUser';
 import { Permissions } from 'src/authz/permissions.decorator';
 import { PermissionsGuard } from 'src/authz/permissions.guard';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import { BookListItemsService } from './bookListItem.service';
 import {
   BookListItemDto,

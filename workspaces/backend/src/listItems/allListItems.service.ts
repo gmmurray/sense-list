@@ -4,8 +4,9 @@ import {
   Injectable,
   NotImplementedException,
 } from '@nestjs/common';
-import { ClientSession, Types } from 'mongoose';
-import { ListType } from 'src/common/listType';
+import { ClientSession } from 'mongoose';
+import { ListType } from 'src/common/types/listType';
+import { StringIdType } from 'src/common/types/stringIdType';
 import { BookListItemsService } from './books/bookListItem.service';
 
 @Injectable()
@@ -24,7 +25,7 @@ export class AllListItemsService {
    */
   async deleteAllItemsByList(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
     listType: ListType,
     session: ClientSession,
   ): Promise<void> {

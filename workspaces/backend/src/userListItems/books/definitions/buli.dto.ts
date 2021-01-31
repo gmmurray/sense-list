@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
-import { BookReadingStatus } from 'src/common/userListItemStatus';
+import { StringIdType } from 'src/common/types/stringIdType';
+import { BookReadingStatus } from 'src/common/types/userListItemStatus';
 import { BookListItemDto } from 'src/listItems/books/definitions/bookListItem.dto';
 import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 import { UserListItemDto } from 'src/userListItems/definitions/userListItem.dto';
@@ -55,9 +56,9 @@ export class BULIDto extends UserListItemDto {
 
 export class CreateBULIDto {
   constructor(
-    public userList: Types.ObjectId | string,
+    public userList: StringIdType,
     public userId: string,
-    public bookListItem: Types.ObjectId | string,
+    public bookListItem: StringIdType,
     public status: BookReadingStatus,
     public owned: boolean,
     public notes?: string,

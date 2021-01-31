@@ -3,7 +3,7 @@ import { BookListItem } from 'src/listItems/books/definitions/bookListItem.schem
 import { List } from 'src/lists/definitions/list.schema';
 import { BookUserListItem } from 'src/userListItems/books/definitions/bookUserListItem.schema';
 import { UserList } from 'src/userLists/definitions/userList.schema';
-import { ListType } from './listType';
+import { ListType } from './types/listType';
 
 //#region collection and entity names
 export const listCollectionName = 'lists';

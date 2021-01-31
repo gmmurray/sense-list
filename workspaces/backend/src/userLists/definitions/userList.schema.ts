@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 import { ListDocument } from 'src/lists/definitions/list.schema';
+import { BookUserListItemDocument } from 'src/userListItems/books/definitions/bookUserListItem.schema';
 
 export type UserListDocument = UserList & Document;
 
@@ -17,7 +17,7 @@ export class UserList {
   notes: string;
 
   @Prop({ type: [Types.ObjectId], ref: 'BookUserListItem' })
-  bookUserListItems: BookListItemDocument[] | Types.ObjectId[];
+  bookUserListItems: BookUserListItemDocument[] | Types.ObjectId[];
 
   @Prop()
   createdAt: Date;

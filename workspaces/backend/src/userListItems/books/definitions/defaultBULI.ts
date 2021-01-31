@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
-import { BookReadingStatus } from 'src/common/userListItemStatus';
+import { StringIdType } from 'src/common/types/stringIdType';
+import { BookReadingStatus } from 'src/common/types/userListItemStatus';
 import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 import { UserListDocument } from 'src/userLists/definitions/userList.schema';
 
@@ -15,8 +16,8 @@ export class DefaultBULI {
 
   static createDefault(
     userId: string,
-    userListId: string | Types.ObjectId,
-    bookListItemId: string | Types.ObjectId,
+    userListId: StringIdType,
+    bookListItemId: StringIdType,
   ): DefaultBULI {
     return new DefaultBULI(
       new Types.ObjectId(userListId),

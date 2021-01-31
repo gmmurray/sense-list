@@ -6,13 +6,14 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model, Types } from 'mongoose';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import { getMultiUserListItemPropName } from 'src/common/mongooseTableHelpers';
 import { BULIService } from './books/buli.service';
 import {
   BookUserListItem,
   BookUserListItemDocument,
 } from './books/definitions/bookUserListItem.schema';
+import { StringIdType } from 'src/common/types/stringIdType';
 
 @Injectable()
 export class AllUserListItemsService {
@@ -33,7 +34,7 @@ export class AllUserListItemsService {
    */
   async deleteAllUserItemsBySingleListItem(
     userId: string,
-    listItemId: string | Types.ObjectId,
+    listItemId: StringIdType,
     listType: ListType,
     session: ClientSession,
   ): Promise<void> {
@@ -103,7 +104,7 @@ export class AllUserListItemsService {
    * @param session
    */
   async deleteAllUserItemsByUserList(
-    userListId: string | Types.ObjectId,
+    userListId: StringIdType,
     listType: ListType,
     session: ClientSession,
   ): Promise<void> {

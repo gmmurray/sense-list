@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 
 import { ListDocument } from 'src/lists/definitions/list.schema';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 
 export class ListItemDto {
   public id: Types.ObjectId;

@@ -21,17 +21,18 @@ import {
 } from './definitions/bookListItem.dto';
 import { BookListItemDomain } from './definitions/bookListItem';
 import { ListsService } from 'src/lists/lists.service';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import {
   handleHttpRequestError,
   validateObjectId,
 } from 'src/common/exceptionWrappers';
 import { OpenLibraryService } from '../../openLibrary/openLibrary.service';
 import { cleanDtoFields } from 'src/common/dtoHelpers';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import { getMultiListItemPropName } from 'src/common/mongooseTableHelpers';
 import { InternalServerErrorException } from '@nestjs/common';
 import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
+import { StringIdType } from 'src/common/types/stringIdType';
 
 export class BookListItemsService extends ListItemsService<
   BookListItemDocument,
@@ -244,7 +245,7 @@ export class BookListItemsService extends ListItemsService<
    */
   async deleteAllItemsByList(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
     session: ClientSession,
     listType: ListType,
   ): Promise<void> {

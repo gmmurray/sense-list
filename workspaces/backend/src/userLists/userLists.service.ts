@@ -10,7 +10,6 @@ import {
   ClientSession,
   Connection,
   Error as MongooseError,
-  isValidObjectId,
   Model,
   Types,
 } from 'mongoose';
@@ -19,7 +18,7 @@ import {
   handleHttpRequestError,
   validateObjectId,
 } from 'src/common/exceptionWrappers';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import {
   getListItemModelName,
   getMultiListItemPropName,
@@ -27,7 +26,7 @@ import {
   getUserListItemModelName,
   getMultiUserListItemPropName,
 } from 'src/common/mongooseTableHelpers';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import { ListDocument } from 'src/lists/definitions/list.schema';
 import { ListsService } from 'src/lists/lists.service';
 import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
@@ -39,6 +38,7 @@ import {
   UserListDto,
 } from './definitions/userList.dto';
 import { UserList, UserListDocument } from './definitions/userList.schema';
+import { StringIdType } from 'src/common/types/stringIdType';
 
 @Injectable()
 export class UserListsService {
@@ -58,7 +58,7 @@ export class UserListsService {
    *
    * @param userId
    */
-  async findAll(userId: string): Promise<DataTotalResponse<UserListDto<any>>> {
+  async findAll(userId: string): Promise<DataTotalResponse<UserListDto>> {
     try {
       const result = await this.model.find({ userId }).exec();
 
@@ -78,7 +78,7 @@ export class UserListsService {
   async getPopulatedUserList(
     userId: string,
     userListId: string,
-  ): Promise<UserListDto<any>> {
+  ): Promise<UserListDto> {
     try {
       validateObjectId(userListId);
       const shallowUserList = await this.model.findById(userListId);
@@ -129,7 +129,7 @@ export class UserListsService {
   async create(
     userId: string,
     createDto: CreateUserListDto,
-  ): Promise<UserListDto<any>> {
+  ): Promise<UserListDto> {
     try {
       validateObjectId(createDto.list);
       const list = await this.hasListReadAccess(userId, createDto.list);
@@ -223,10 +223,7 @@ export class UserListsService {
    * @param userId
    * @param userListId
    */
-  async delete(
-    userId: string,
-    userListId: string | Types.ObjectId,
-  ): Promise<void> {
+  async delete(userId: string, userListId: StringIdType): Promise<void> {
     try {
       validateObjectId(userListId);
       const userList = await this.model
@@ -274,7 +271,7 @@ export class UserListsService {
    */
   async updateItemsInUserList(
     userId: string,
-    userListId: string | Types.ObjectId,
+    userListId: StringIdType,
     operation: '$pull' | '$push',
     field: string,
     value:
@@ -337,7 +334,7 @@ export class UserListsService {
    * @param session
    */
   async deleteAllUserListsByList(
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
     session: ClientSession,
   ): Promise<void> {
     await this.model.deleteMany(
@@ -351,9 +348,7 @@ export class UserListsService {
    *
    * @param userListId
    */
-  async findUserListById(
-    userListId: string | Types.ObjectId,
-  ): Promise<UserListDocument> {
+  async findUserListById(userListId: StringIdType): Promise<UserListDocument> {
     return await this.model.findById(new Types.ObjectId(userListId));
   }
 
@@ -365,7 +360,7 @@ export class UserListsService {
    */
   async hasListReadAccess(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
   ): Promise<ListDocument> {
     return await this.listsService.getListWithReadAccess(userId, listId);
   }

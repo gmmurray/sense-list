@@ -1,7 +1,7 @@
 import { Types } from 'mongoose';
 import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 
-import { ListType } from '../../common/listType';
+import { ListType } from '../../common/types/listType';
 import { ListDocument } from './list.schema';
 
 export class ListDto {

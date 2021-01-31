@@ -1,5 +1,3 @@
-type expressionType = (key: string) => boolean;
-
 /**
  * Removes undefined fields from a given dto object.
  * Accepts an additional function to run against each key as
@@ -10,7 +8,7 @@ type expressionType = (key: string) => boolean;
  */
 export function cleanDtoFields<T>(
   reference: T,
-  additionalExpression?: expressionType,
+  additionalExpression?: (key: string) => boolean,
 ) {
   return {
     ...Object.keys(reference)

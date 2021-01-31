@@ -12,16 +12,17 @@ import {
   handleHttpRequestError,
   validateObjectId,
 } from 'src/common/exceptionWrappers';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import {
   getMultiListItemPropName,
   getSingleListPropName,
 } from 'src/common/mongooseTableHelpers';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import { ListDocument } from 'src/lists/definitions/list.schema';
 import { ListsService } from 'src/lists/lists.service';
 import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
 import { ListItemDocument } from './definitions/listItem.schema';
+import { StringIdType } from 'src/common/types/stringIdType';
 
 @Injectable()
 export abstract class ListItemsService<
@@ -129,7 +130,7 @@ export abstract class ListItemsService<
    */
   async deleteAllItemsByList(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
     session: ClientSession,
     listType: ListType,
     itemIds: Types.ObjectId[],
@@ -153,7 +154,7 @@ export abstract class ListItemsService<
    */
   async hasListItemWriteAccess(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
   ): Promise<ListDocument> {
     return await this.listsService.getListWithWriteAccess(userId, listId);
   }
@@ -165,7 +166,7 @@ export abstract class ListItemsService<
    */
   async hasListItemReadAccess(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
   ): Promise<ListDocument> {
     return await this.listsService.getListWithReadAccess(userId, listId);
   }

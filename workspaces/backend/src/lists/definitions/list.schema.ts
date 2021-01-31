@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 
 export type ListDocument = List & Document;

@@ -2,7 +2,7 @@ import { Types } from 'mongoose';
 
 import { ListItemDomain } from 'src/listItems/definitions/listItem.domain';
 import { ListDocument } from 'src/lists/definitions/list.schema';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import { OpenLibraryBook } from '../../../openLibrary/OpenLibraryBook';
 
 export class BookListItemMeta {

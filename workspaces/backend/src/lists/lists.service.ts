@@ -13,7 +13,7 @@ import {
   handleHttpRequestError,
   validateObjectId,
 } from 'src/common/exceptionWrappers';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import { List, ListDocument } from './definitions/list.schema';
 import {
   CreateListDto,
@@ -24,6 +24,7 @@ import {
 import { cleanDtoFields } from 'src/common/dtoHelpers';
 import { UserListsService } from 'src/userLists/userLists.service';
 import { AllListItemsService } from 'src/listItems/allListItems.service';
+import { StringIdType } from 'src/common/types/stringIdType';
 
 @Injectable()
 export class ListsService {
@@ -209,7 +210,7 @@ export class ListsService {
    */
   async getListWithReadAccess(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
   ): Promise<ListDocument> {
     const result = await this.listModel
       .findOne({
@@ -235,7 +236,7 @@ export class ListsService {
    */
   async getListWithWriteAccess(
     userId: string,
-    listId: string | Types.ObjectId,
+    listId: StringIdType,
   ): Promise<ListDocument> {
     const result = this.listModel
       .findOne({
@@ -269,7 +270,7 @@ export class ListsService {
     userId: string,
     operation: '$pull' | '$push',
     field: string,
-    value: string | Types.ObjectId,
+    value: StringIdType,
     session: ClientSession,
   ): Promise<void> {
     try {

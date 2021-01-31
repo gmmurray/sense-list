@@ -1,5 +1,5 @@
-import { ListType } from 'src/common/listType';
-import { BookReadingStatus } from 'src/common/userListItemStatus';
+import { ListType } from 'src/common/types/listType';
+import { BookReadingStatus } from 'src/common/types/userListItemStatus';
 import { CreateBookListItemDto } from 'src/listItems/books/definitions/bookListItem.dto';
 import { CreateListDto } from 'src/lists/definitions/list.dto';
 import { CreateBULIDto } from 'src/userListItems/books/definitions/buli.dto';

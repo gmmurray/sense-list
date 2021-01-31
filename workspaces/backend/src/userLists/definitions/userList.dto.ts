@@ -1,16 +1,18 @@
 import { NotImplementedException } from '@nestjs/common';
-import { Document, Types } from 'mongoose';
+import { Types } from 'mongoose';
+import { StringIdType } from 'src/common/types/stringIdType';
 import { ListDto } from 'src/lists/definitions/list.dto';
 import { ListDocument } from 'src/lists/definitions/list.schema';
+import { BookUserListItemDocument } from 'src/userListItems/books/definitions/bookUserListItem.schema';
 import { UserListDocument } from './userList.schema';
 
-export class UserListDto<T extends Document> {
+export class UserListDto {
   constructor(
     public id: Types.ObjectId,
-    public list: string | Types.ObjectId | ListDocument | ListDto,
+    public list: StringIdType | ListDocument | ListDto,
     public userId: string,
     public notes: string,
-    public userListItems: Types.ObjectId[] | T[],
+    public userListItems: Types.ObjectId[] | BookUserListItemDocument[],
     public createdAt: Date,
     public updatedAt: Date,
   ) {}
@@ -51,7 +53,7 @@ export class UserListDto<T extends Document> {
 
 export class CreateUserListDto {
   constructor(
-    public list: string | Types.ObjectId,
+    public list: StringIdType,
     public userId: string,
     public notes: string,
   ) {}

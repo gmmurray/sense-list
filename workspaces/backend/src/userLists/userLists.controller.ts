@@ -20,7 +20,7 @@ import {
 import { AuthRequest } from 'src/authz/authzUser';
 import { Permissions } from 'src/authz/permissions.decorator';
 import { PermissionsGuard } from 'src/authz/permissions.guard';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import {
   CreateUserListDto,
   PatchUserListDto,
@@ -40,7 +40,7 @@ export class UserListsController {
   @Permissions(UserListApiPermissions.read)
   async index(
     @Req() { user }: AuthRequest,
-  ): Promise<DataTotalResponse<UserListDto<any>>> {
+  ): Promise<DataTotalResponse<UserListDto>> {
     const userId = user.sub;
     return await this.userListsService.findAll(userId);
   }
@@ -61,7 +61,7 @@ export class UserListsController {
   async getPopulatedUserList(
     @Req() { user }: AuthRequest,
     @Param('userListId') userListId: string,
-  ): Promise<UserListDto<any>> {
+  ): Promise<UserListDto> {
     const userId = user.sub;
     return await this.userListsService.getPopulatedUserList(userId, userListId);
   }
@@ -77,7 +77,7 @@ export class UserListsController {
   async create(
     @Req() { user }: AuthRequest,
     @Body() createDto: CreateUserListDto,
-  ): Promise<UserListDto<any>> {
+  ): Promise<UserListDto> {
     const userId = user.sub;
     return await this.userListsService.create(userId, createDto);
   }

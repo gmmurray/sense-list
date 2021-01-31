@@ -19,7 +19,7 @@ import {
   createList,
   createUserList,
 } from './mock/createDtos';
-import { BookReadingStatus } from 'src/common/userListItemStatus';
+import { BookReadingStatus } from 'src/common/types/userListItemStatus';
 
 const BASE_URL = '/books/user-list-items';
 

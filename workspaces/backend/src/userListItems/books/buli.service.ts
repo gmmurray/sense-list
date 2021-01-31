@@ -16,14 +16,14 @@ import {
   handleHttpRequestError,
   validateObjectId,
 } from 'src/common/exceptionWrappers';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 import {
   getListItemModelName,
   getMultiUserListItemPropName,
   getSingleListItemPropName,
   getSingleUserListPropName,
 } from 'src/common/mongooseTableHelpers';
-import { DataTotalResponse } from 'src/common/responseWrappers';
+import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import { UserListsService } from 'src/userLists/userLists.service';
 import { UserListItemsService } from '../userListItem.service';
 import {
@@ -32,6 +32,7 @@ import {
 } from './definitions/bookUserListItem.schema';
 import { BULIDto, CreateBULIDto, PatchBULIDto } from './definitions/buli.dto';
 import { DefaultBULI } from './definitions/defaultBULI';
+import { StringIdType } from 'src/common/types/stringIdType';
 
 export class BULIService extends UserListItemsService<
   BookUserListItemDocument,
@@ -74,7 +75,7 @@ export class BULIService extends UserListItemsService<
    */
   async findAllByUserList(
     userId: string,
-    userListId: string | Types.ObjectId,
+    userListId: StringIdType,
   ): Promise<DataTotalResponse<BULIDto>> {
     try {
       validateObjectId(userListId);
@@ -114,7 +115,7 @@ export class BULIService extends UserListItemsService<
    */
   async findById(
     userId: string,
-    userListItemId: string | Types.ObjectId,
+    userListItemId: StringIdType,
   ): Promise<BULIDto> {
     try {
       validateObjectId(userListItemId);
@@ -196,7 +197,7 @@ export class BULIService extends UserListItemsService<
    */
   async patch(
     userId: string,
-    buliId: string | Types.ObjectId,
+    buliId: StringIdType,
     patchDto: PatchBULIDto,
   ): Promise<void> {
     try {
@@ -224,10 +225,7 @@ export class BULIService extends UserListItemsService<
    * @param userId
    * @param userListItemId
    */
-  async delete(
-    userId: string,
-    userListItemId: string | Types.ObjectId,
-  ): Promise<void> {
+  async delete(userId: string, userListItemId: StringIdType): Promise<void> {
     return await super.delete(userId, userListItemId, ListType.Book);
   }
 
@@ -243,7 +241,7 @@ export class BULIService extends UserListItemsService<
    */
   async createDefaultItemsForList(
     userId: string,
-    userListId: string | Types.ObjectId,
+    userListId: StringIdType,
     bookListItems: Types.ObjectId[],
     session: ClientSession,
   ): Promise<BookUserListItemDocument[]> {
@@ -268,7 +266,7 @@ export class BULIService extends UserListItemsService<
    */
   async findAllBySingleListItem(
     userId: string,
-    listItemId: string | Types.ObjectId,
+    listItemId: StringIdType,
   ): Promise<BookUserListItemDocument[]> {
     return await this.bookModel
       .find({

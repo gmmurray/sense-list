@@ -3,7 +3,7 @@ import { Types } from 'mongoose';
 import { ListItemDto } from 'src/listItems/definitions/listItem.dto';
 import { BookListItemDocument } from './bookListItem.schema';
 import { BookListItemMeta } from './bookListItem';
-import { ListType } from 'src/common/listType';
+import { ListType } from 'src/common/types/listType';
 
 export class BookListItemDto extends ListItemDto {
   constructor(
