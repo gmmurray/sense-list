@@ -21,3 +21,7 @@ export enum UserListItemApiPermissions {
   write = 'write:user-list-items',
   delete = 'delete:user-list-items',
 }
+
+export enum OpenLibraryApiPermissions {
+  read = 'read:books-api',
+}
