@@ -8,6 +8,7 @@ import { ListType } from 'src/common/types/listType';
 export class BookListItemDto extends ListItemDto {
   constructor(
     public isbn: string,
+    public volumeId: string,
     public meta: BookListItemMeta,
     baseProperties: ListItemDto,
   ) {
@@ -23,6 +24,7 @@ export class BookListItemDto extends ListItemDto {
   static assign(doc: BookListItemDocument): BookListItemDto {
     return new BookListItemDto(
       doc.isbn,
+      doc.volumeId,
       { ...doc.meta },
       {
         id: doc._id,
@@ -61,7 +63,7 @@ export class QueryBookListItemDto {
 export class CreateBookListItemDto {
   constructor(
     public list: Types.ObjectId,
-    public isbn: string,
+    public volumeId: string,
     public ordinal: number,
   ) {}
 }
