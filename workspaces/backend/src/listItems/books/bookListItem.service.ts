@@ -33,6 +33,8 @@ import { getMultiListItemPropName } from 'src/common/mongooseTableHelpers';
 import { InternalServerErrorException } from '@nestjs/common';
 import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
 import { StringIdType } from 'src/common/types/stringIdType';
+import { GoogleBooksService } from 'src/googleBooks/googlebooks.service';
+import { GoogleApiBook } from 'src/googleBooks/GoogleApiBook';
 
 export class BookListItemsService extends ListItemsService<
   BookListItemDocument,
@@ -46,6 +48,7 @@ export class BookListItemsService extends ListItemsService<
     readonly bookListItemsModel: Model<BookListItemDocument>,
     @InjectConnection() private connection: Connection,
     readonly listService: ListsService,
+    readonly googleBooksService: GoogleBooksService,
     readonly openLibraryService: OpenLibraryService,
     readonly allUserListItemService: AllUserListItemsService,
   ) {
@@ -152,16 +155,23 @@ export class BookListItemsService extends ListItemsService<
       const list = await this.hasListItemWriteAccess(userId, createDto.list);
       if (!list) throw new MongooseError.DocumentNotFoundError(null);
 
-      const apiBook = await this.openLibraryService.getBookByIsbn(
-        createDto.isbn,
+      const googleVolume = await this.googleBooksService.getBookByVolumeId(
+        createDto.volumeId,
       );
 
-      if (!apiBook) throw new MongooseError.ValidationError(null);
+      if (!googleVolume) throw new MongooseError.ValidationError(null);
+
+      const isbn = GoogleApiBook.getIsbn(
+        googleVolume.volumeInfo.industryIdentifiers,
+      );
+
+      const openLibraryBook = await this.openLibraryService.getBookByIsbn(isbn);
 
       const normalizedBook = BookListItemDomain.create(
         new Types.ObjectId(createDto.list),
         createDto.ordinal,
-        apiBook,
+        googleVolume,
+        openLibraryBook,
       );
 
       const session = await this.connection.startSession();

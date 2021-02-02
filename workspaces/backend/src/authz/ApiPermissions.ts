@@ -25,3 +25,7 @@ export enum UserListItemApiPermissions {
 export enum OpenLibraryApiPermissions {
   read = 'read:books-api',
 }
+
+export enum GoogleBooksApiPermissions {
+  read = 'read:google-books',
+}

@@ -11,6 +11,7 @@ import { BookListItemsController } from './books/bookListItems.controller';
 import { OpenLibraryModule } from '../openLibrary/openLibrary.module';
 import { AllListItemsService } from './allListItems.service';
 import { UserListItemsModule } from '../userListItems/userListItems.module';
+import { GoogleBooksModule } from 'src/googleBooks/googleBooks.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { UserListItemsModule } from '../userListItems/userListItems.module';
       { name: BookListItem.name, schema: BookListItemSchema },
     ]),
     forwardRef(() => ListsModule),
+    GoogleBooksModule,
     OpenLibraryModule,
     UserListItemsModule,
   ],

@@ -11,6 +11,9 @@ export class BookListItem extends ListItem {
   @Prop({ required: true })
   isbn: string;
 
+  @Prop({ required: true })
+  volumeId: string;
+
   @Prop()
   meta: BookListItemMeta;
 }

@@ -15,7 +15,7 @@ export const createList: CreateListDto = {
 
 export const createBookListItem: CreateBookListItemDto = {
   list: null,
-  isbn: '9781408855904',
+  volumeId: 'BnCADwAAQBAJ',
   ordinal: 0,
 };
 

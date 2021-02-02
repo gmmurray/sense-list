@@ -4,48 +4,57 @@ import { ListItemDomain } from 'src/listItems/definitions/listItem.domain';
 import { ListDocument } from 'src/lists/definitions/list.schema';
 import { ListType } from 'src/common/types/listType';
 import { OpenLibraryBook } from '../../../openLibrary/OpenLibraryBook';
+import { GoogleApiBook } from 'src/googleBooks/GoogleApiBook';
 
 export class BookListItemMeta {
   constructor(
-    public authors: string[],
     public title: string,
-    public subjects: string[],
+    public subtitle: string,
+    public authors: string[],
+    public publishedDate: string,
     public description: string,
-    public thumbnail: string,
-    public publishDate: string,
-    public pages: number,
-    public identifiers: Record<string, string>,
+    public pageCount: number,
+    public thumbnail_url: string,
+    public language: string,
+    public selfLink: string,
+    public identifiers?: Record<string, string>,
   ) {}
 
-  static create(book: OpenLibraryBook): BookListItemMeta {
+  static create(
+    googleVolume: GoogleApiBook,
+    openLibraryBook?: OpenLibraryBook,
+  ): BookListItemMeta {
     const {
-      authors,
-      title,
-      subjects,
-      description,
-      publish_date: publishDate,
-      identifiers,
-      number_of_pages: pages,
-    } = book.details;
+      selfLink,
+      volumeInfo: {
+        title,
+        subtitle,
+        authors,
+        publishedDate,
+        description,
+        pageCount,
+        imageLinks: { thumbnail },
+        language,
+      },
+    } = googleVolume;
 
-    const { thumbnail_url: thumbnail } = book;
-
-    const normalAuthors = authors.map(kvp => kvp.name);
-    const relevantIdentifiers = {};
-    Object.keys(identifiers)
-      .filter(key => key === 'goodreads' || key === 'amazon')
-      .forEach(key => {
-        relevantIdentifiers[key] = identifiers[key][0];
-      });
+    let relevantIdentifiers = undefined;
+    if (openLibraryBook?.details?.identifiers ?? false) {
+      relevantIdentifiers = OpenLibraryBook.getRelevantIdentifiers(
+        openLibraryBook.details.identifiers,
+      );
+    }
 
     return new BookListItemMeta(
-      normalAuthors,
       title,
-      subjects,
+      subtitle,
+      authors,
+      publishedDate,
       description,
+      pageCount,
       thumbnail,
-      publishDate,
-      pages,
+      language,
+      selfLink,
       relevantIdentifiers,
     );
   }
@@ -53,9 +62,11 @@ export class BookListItemMeta {
 
 export class BookListItemDomain extends ListItemDomain {
   public isbn: string;
+  public volumeId: string;
   public meta: BookListItemMeta;
   constructor(
     isbn: string,
+    volumeId: string,
     meta: BookListItemMeta,
     list: Types.ObjectId | ListDocument,
     ordinal: number,
@@ -63,6 +74,7 @@ export class BookListItemDomain extends ListItemDomain {
     super();
     this.listType = ListType.Book;
     this.isbn = isbn;
+    this.volumeId = volumeId;
     this.meta = meta;
     this.list = list;
     this.ordinal = ordinal;
@@ -71,10 +83,13 @@ export class BookListItemDomain extends ListItemDomain {
   static create(
     list: Types.ObjectId | ListDocument,
     ordinal: number,
-    book: OpenLibraryBook,
+    googleVolume: GoogleApiBook,
+    openLibraryBook?: OpenLibraryBook,
   ): BookListItemDomain {
-    const meta = BookListItemMeta.create(book);
-    const isbn = book.details.isbn_13 ?? book.details.isbn_10;
-    return new BookListItemDomain(isbn[0], meta, list, ordinal);
+    const meta = BookListItemMeta.create(googleVolume, openLibraryBook ?? null);
+    const isbn = GoogleApiBook.getIsbn(
+      googleVolume.volumeInfo.industryIdentifiers,
+    );
+    return new BookListItemDomain(isbn, googleVolume.id, meta, list, ordinal);
   }
 }

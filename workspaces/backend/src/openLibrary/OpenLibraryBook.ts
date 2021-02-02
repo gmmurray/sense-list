@@ -21,4 +21,22 @@ export class OpenLibraryBook {
     public thumbnail_url: string,
     public details: OpenLibraryBookDetails,
   ) {}
+
+  public static getNormalizedAuthors(
+    authors: OpenLibraryBookAuthor[],
+  ): string[] {
+    return authors.map(kvp => kvp.name);
+  }
+  public static getRelevantIdentifiers(
+    identifiers: OpenLibraryBookIdentifier,
+  ): Record<string, string> {
+    const relevantIdentifiers = {};
+    Object.keys(identifiers)
+      .filter(key => key === 'goodreads' || key === 'amazon')
+      .forEach(key => {
+        relevantIdentifiers[key] = identifiers[key][0];
+      });
+
+    return relevantIdentifiers;
+  }
 }

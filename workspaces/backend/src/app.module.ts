@@ -8,6 +8,7 @@ import { OpenLibraryModule } from './openLibrary/openLibrary.module';
 import { ListItemsModule } from './listItems/listItems.module';
 import { UserListsModule } from './userLists/userLists.module';
 import { UserListItemsModule } from './userListItems/userListItems.module';
+import { GoogleBooksModule } from './googleBooks/googleBooks.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserListItemsModule } from './userListItems/userListItems.module';
     AuthzModule,
     HttpModule,
     OpenLibraryModule,
+    GoogleBooksModule,
     ListItemsModule,
     UserListsModule,
     UserListItemsModule,
