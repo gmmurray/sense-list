@@ -60,7 +60,10 @@ export class UserListsService {
    */
   async findAll(userId: string): Promise<DataTotalResponse<UserListDto>> {
     try {
-      const result = await this.model.find({ userId }).exec();
+      const result = await this.model
+        .find({ userId })
+        .populate(getSingleListPropName())
+        .exec();
 
       return new DataTotalResponse(result.map(doc => UserListDto.assign(doc)));
     } catch (error) {
