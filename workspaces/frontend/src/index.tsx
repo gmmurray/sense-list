@@ -1,39 +1,36 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
+import { Auth0Provider } from '@auth0/auth0-react';
+import { BrowserRouter } from 'react-router-dom';
+import { Provider as AlertProvider } from 'react-alert';
+
+import { getAuth0Credentials } from './main/config/startupConfig';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { Auth0Provider } from '@auth0/auth0-react';
+import AlertTemplate from './library/components/auth/layout/AlertTemplate';
+import alertOptions from './library/components/auth/layout/alertOptions';
 
-const domain =
-  process.env.NODE_ENV === 'development'
-    ? process.env.REACT_APP_AUTH0_DOMAIN!
-    : '';
-const clientId =
-  process.env.NODE_ENV === 'development'
-    ? process.env.REACT_APP_AUTH0_CLIENT_ID!
-    : '';
-const audience =
-  process.env.NODE_ENV === 'development'
-    ? process.env.REACT_APP_AUTH0_API_AUDIENCE!
-    : '';
+import 'semantic-ui-css/semantic.min.css';
+
+const auth0Credentials = getAuth0Credentials();
 
 ReactDOM.render(
   <Auth0Provider
-    domain={domain}
-    clientId={clientId}
-    audience={audience}
+    domain={auth0Credentials.domain}
+    clientId={auth0Credentials.clientId}
+    audience={auth0Credentials.audience}
     redirectUri={window.location.origin}
     useRefreshTokens={true}
   >
     <React.StrictMode>
-      <App />
+      <BrowserRouter>
+        <AlertProvider template={AlertTemplate} {...alertOptions}>
+          <App />
+        </AlertProvider>
+      </BrowserRouter>
     </React.StrictMode>
   </Auth0Provider>,
   document.getElementById('root'),
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

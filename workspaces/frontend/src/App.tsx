@@ -1,68 +1,44 @@
-import React, { useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { Redirect, Route, Switch } from 'react-router-dom';
+import authRoutes from './main/routes/auth';
+import PrivateRoute from './pages/auth/PrivateRoute';
+import { RouteDeclaration } from './library/types/routes';
+import { privateRoutes, publicRoutes } from './main/routes';
+import homeRoutes from './main/routes/home';
+import LoginLoader from './library/components/auth/layout/LoginLoader';
 
 function App() {
-  const {
-    loginWithRedirect,
-    logout,
-    user,
-    isAuthenticated,
-    getAccessTokenSilently,
-    isLoading,
-  } = useAuth0();
+  const { isAuthenticated, isLoading } = useAuth0();
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const token = await getAccessTokenSilently();
-
-        const response = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/lists`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-        const data = await response.json();
-        console.log(data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    getData();
-  }, []);
-
-  const AuthButton = () => {
-    if (isAuthenticated) {
-      return (
-        <button
-          className="App-link"
-          onClick={() => logout({ returnTo: window.location.origin })}
-        >
-          Log out
-        </button>
-      );
-    }
-    return (
-      <button className="App-link" onClick={() => loginWithRedirect()}>
-        Login
-      </button>
-    );
-  };
+  if (isLoading) {
+    return <LoginLoader />;
+  }
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <AuthButton />
-      </header>
-    </div>
+    <Switch>
+      {publicRoutes.map(({ path, render, exact }: RouteDeclaration) => (
+        <Route key={path} path={path} exact={exact} render={render} />
+      ))}
+      {privateRoutes.map(({ path, render, exact }: RouteDeclaration) => (
+        <PrivateRoute
+          key={path}
+          isAuthenticated={isAuthenticated}
+          path={path}
+          exact={exact}
+          render={render}
+        />
+      ))}
+      <Route
+        render={() => {
+          if (isAuthenticated) {
+            return <Redirect to={homeRoutes.index.path} />;
+          } else {
+            return <Redirect to={authRoutes.login.path} />;
+          }
+        }}
+      />
+    </Switch>
   );
 }
 
