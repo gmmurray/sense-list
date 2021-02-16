@@ -1,12 +1,10 @@
 import React from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Redirect, Route, Switch } from 'react-router-dom';
-import authRoutes from './main/routes/auth';
-import PrivateRoute from './pages/auth/PrivateRoute';
+import PrivateRoute from './library/components/auth/PrivateRoute';
 import { RouteDeclaration } from './library/types/routes';
-import { privateRoutes, publicRoutes } from './main/routes';
-import homeRoutes from './main/routes/home';
-import LoginLoader from './library/components/auth/layout/LoginLoader';
+import { appRoutes, privateRoutes, publicRoutes } from './main/routes';
+import LoginLoader from './library/components/layout/LoginLoader';
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth0();
@@ -32,9 +30,9 @@ function App() {
       <Route
         render={() => {
           if (isAuthenticated) {
-            return <Redirect to={homeRoutes.index.path} />;
+            return <Redirect to={appRoutes.home.index.path} />;
           } else {
-            return <Redirect to={authRoutes.login.path} />;
+            return <Redirect to={appRoutes.auth.login.path} />;
           }
         }}
       />

@@ -1,4 +1,4 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { StringIdType } from 'src/common/types/stringIdType';
 import { BookReadingStatus } from 'src/common/types/userListItemStatus';
 import { BookListItemDto } from 'src/listItems/books/definitions/bookListItem.dto';
@@ -28,14 +28,27 @@ export class BULIDto extends UserListItemDto {
   }
 
   static assign(doc: BookUserListItemDocument): BULIDto {
-    return new BULIDto(doc.bookListItem, doc.status, doc.owned, {
-      id: doc._id,
-      userList: doc.userList,
-      userId: doc.userId,
-      notes: doc.notes,
-      createdAt: doc.createdAt,
-      updatedAt: doc.updatedAt,
-    });
+    let subBookListItem: BookListItemDto | undefined;
+    if (doc.bookListItem && doc.bookListItem instanceof Document) {
+      subBookListItem = BookListItemDto.assign(doc.bookListItem);
+    }
+    let subUserList: UserListDto | undefined;
+    if (doc.userList && doc.userList instanceof Document) {
+      subUserList = UserListDto.assign(doc.userList);
+    }
+    return new BULIDto(
+      subBookListItem || doc.bookListItem,
+      doc.status,
+      doc.owned,
+      {
+        id: doc._id,
+        userList: subUserList || doc.userList,
+        userId: doc.userId,
+        notes: doc.notes,
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
+      },
+    );
   }
   static assignWithPopulatedDocuments(doc: BookUserListItemDocument): BULIDto {
     return new BULIDto(

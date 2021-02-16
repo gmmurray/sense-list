@@ -25,6 +25,11 @@ import { cleanDtoFields } from 'src/common/dtoHelpers';
 import { UserListsService } from 'src/userLists/userLists.service';
 import { AllListItemsService } from 'src/listItems/allListItems.service';
 import { StringIdType } from 'src/common/types/stringIdType';
+import {
+  getListItemModelName,
+  getMultiListItemPropName,
+} from 'src/common/mongooseTableHelpers';
+import { ListType } from 'src/common/types/listType';
 
 @Injectable()
 export class ListsService {
@@ -67,10 +72,18 @@ export class ListsService {
       queryListDto,
       key => key !== 'ownerOnly',
     );
+    if (queryListDto.ownerOnly && typeof queryListDto.ownerOnly === 'string') {
+      queryListDto.ownerOnly = queryListDto.ownerOnly === 'true';
+    }
     try {
-      const accessFilter = dto.ownerOnly
-        ? ListsService.isListSchemaOwner(userId)
-        : ListsService.hasListSchemaReadAccess(userId);
+      let accessFilter: FilterQuery<List>;
+      if (queryListDto.ownerOnly === true) {
+        accessFilter = ListsService.isListSchemaOwner(userId);
+      } else if (queryListDto.ownerOnly === false) {
+        accessFilter = ListsService.isPublicButNotOwner(userId);
+      } else {
+        accessFilter = ListsService.hasListSchemaReadAccess(userId);
+      }
       const result = await this.listModel
         .find({
           $and: [{ ...accessFilter }, { ...ListsService.getQueryFilter(dto) }],
@@ -96,6 +109,10 @@ export class ListsService {
           $and: [
             { _id: listId, ...ListsService.hasListSchemaReadAccess(userId) },
           ],
+        })
+        .populate({
+          path: getMultiListItemPropName(ListType.Book),
+          model: getListItemModelName(ListType.Book),
         })
         .exec();
 
@@ -341,6 +358,10 @@ export class ListsService {
    */
   static isListSchemaOwner(userId: string): FilterQuery<List> {
     return { ownerId: userId };
+  }
+
+  static isPublicButNotOwner(userId: string): FilterQuery<List> {
+    return { $and: [{ ownerId: { $ne: userId } }, { isPublic: true }] };
   }
   //#endregion
 }

@@ -5,8 +5,8 @@ import {
   RouteProps,
   RouteComponentProps,
 } from 'react-router-dom';
-import PageLayout from 'src/library/components/auth/layout/PageLayout';
-import authRoutes from 'src/main/routes/auth';
+import PageLayout from 'src/library/components/layout/PageLayout';
+import { appRoutes } from 'src/main/routes';
 
 type PrivateRouteType = {
   isAuthenticated: boolean;
@@ -36,12 +36,13 @@ const PrivateRoute: React.FC<PrivateRouteType & RouteProps> = ({
         {...rest}
         render={({ location }: RouteComponentProps) => (
           <Redirect
-            to={{ pathname: authRoutes.login.path, state: { from: location } }}
+            to={{
+              pathname: appRoutes.auth.login.path,
+              state: { from: location },
+            }}
           />
         )}
-      >
-        {/* <Redirect to={{ pathname: '/login', state: { from: location } }} /> */}
-      </Route>
+      />
     );
   }
 };

@@ -1,4 +1,5 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { BookListItemDto } from 'src/listItems/books/definitions/bookListItem.dto';
 import { BookListItemDocument } from 'src/listItems/books/definitions/bookListItem.schema';
 
 import { ListType } from '../../common/types/listType';
@@ -15,10 +16,23 @@ export class ListDto {
     public ownerId: string,
     public createdAt: Date,
     public updatedAt: Date,
-    public bookListItems: Types.ObjectId[] | BookListItemDocument[],
+    public bookListItems:
+      | Types.ObjectId[]
+      | BookListItemDocument[]
+      | BookListItemDto[],
   ) {}
 
   static assign(doc: ListDocument): ListDto {
+    let subBookListItems: BookListItemDto[] | undefined;
+    if (
+      doc.bookListItems &&
+      doc.bookListItems.length &&
+      (doc.bookListItems as Array<any>).every(item => item instanceof Document)
+    ) {
+      subBookListItems = (doc.bookListItems as BookListItemDocument[]).map(
+        item => BookListItemDto.assign(item),
+      );
+    }
     return new ListDto(
       doc._id,
       doc.isPublic,
@@ -29,7 +43,7 @@ export class ListDto {
       doc.ownerId,
       doc.createdAt,
       doc.updatedAt,
-      doc.bookListItems,
+      subBookListItems || doc.bookListItems,
     );
   }
 }
@@ -39,7 +53,7 @@ export class QueryListDto {
   public description?: string;
   public category?: string;
   public type?: ListType;
-  public ownerOnly?: boolean;
+  public ownerOnly?: boolean | string;
   constructor({
     title = undefined,
     description = undefined,
