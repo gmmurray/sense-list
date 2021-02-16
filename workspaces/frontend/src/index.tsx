@@ -7,8 +7,8 @@ import { Provider as AlertProvider } from 'react-alert';
 import { getAuth0Credentials } from './main/config/startupConfig';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import AlertTemplate from './library/components/auth/layout/AlertTemplate';
-import alertOptions from './library/components/auth/layout/alertOptions';
+import AlertTemplate from './library/components/layout/AlertTemplate';
+import alertOptions from './library/constants/alertOptions';
 
 import 'semantic-ui-css/semantic.min.css';
 

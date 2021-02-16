@@ -1,9 +1,10 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 import { ListItemDto } from 'src/listItems/definitions/listItem.dto';
 import { BookListItemDocument } from './bookListItem.schema';
 import { BookListItemMeta } from './bookListItem';
 import { ListType } from 'src/common/types/listType';
+import { ListDto } from 'src/lists/definitions/list.dto';
 
 export class BookListItemDto extends ListItemDto {
   constructor(
@@ -22,13 +23,17 @@ export class BookListItemDto extends ListItemDto {
   }
 
   static assign(doc: BookListItemDocument): BookListItemDto {
+    let subList: ListDto | undefined;
+    if (doc.list && doc.list instanceof Document) {
+      subList = ListDto.assign(doc.list);
+    }
     return new BookListItemDto(
       doc.isbn,
       doc.volumeId,
       { ...doc.meta },
       {
         id: doc._id,
-        list: doc.list,
+        list: subList || doc.list,
         listType: doc.listType,
         ordinal: doc.ordinal,
         createdAt: doc.createdAt,

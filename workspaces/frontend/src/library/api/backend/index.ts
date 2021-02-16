@@ -7,6 +7,7 @@ export type authenticatedRequestParams = {
   method: AxiosRequestConfig['method'];
   url: AxiosRequestConfig['url'];
   data?: AxiosRequestConfig['data'];
+  params?: AxiosRequestConfig['params'];
 };
 
 const axiosClient = axios.create({ timeout: 1000 });
@@ -16,6 +17,7 @@ export const authenticatedRequest = async ({
   method,
   url,
   data,
+  params,
 }: authenticatedRequestParams): Promise<any> => {
   try {
     const token = await getToken(authContext);
@@ -23,6 +25,7 @@ export const authenticatedRequest = async ({
       url,
       method,
       data,
+      params,
       headers: { Authorization: `Bearer ${token}` },
     });
 

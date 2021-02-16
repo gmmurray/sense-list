@@ -1,6 +1,12 @@
-import { RouteDeclaration, RouteTree } from 'src/library/types/routes';
+import {
+  AppRouteTree,
+  RouteDeclaration,
+  RouteTree,
+} from 'src/library/types/routes';
 import authRoutes from './auth';
 import homeRoutes from './home';
+import listsRoutes from './lists';
+import progressRoutes from './progress';
 
 const flattenRouteTree = (routes: RouteTree) =>
   Object.keys(routes).map(key => ({
@@ -24,9 +30,13 @@ export const publicRoutes = [
 export const privateRoutes = [
   ...filterToPrivate(flattenRouteTree(authRoutes)),
   ...filterToPrivate(flattenRouteTree(homeRoutes)),
+  ...filterToPrivate(flattenRouteTree(progressRoutes)),
+  ...filterToPrivate(flattenRouteTree(listsRoutes)),
 ];
 
-export const routeTree: RouteTree = {
-  ...authRoutes,
-  ...homeRoutes,
+export const appRoutes: AppRouteTree = {
+  auth: { ...authRoutes },
+  home: { ...homeRoutes },
+  progress: { ...progressRoutes },
+  lists: { ...listsRoutes },
 };
