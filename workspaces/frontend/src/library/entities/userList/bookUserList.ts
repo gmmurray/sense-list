@@ -1,6 +1,6 @@
 import { BookList } from '../list/bookList';
 import { BULI } from '../uli/BookUserListItem';
-import { UserList } from './userList';
+import { UserList } from './UserList';
 
 export class BookUserList extends UserList {
   constructor(

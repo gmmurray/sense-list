@@ -12,7 +12,7 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import { getHomePageUserLists } from 'src/library/api/backend/userLists';
-import { BookUserList } from 'src/library/entities/userList/bookUserList';
+import { BookUserList } from 'src/library/entities/userList/BookUserList';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { appRoutes } from 'src/main/routes';
 

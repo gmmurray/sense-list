@@ -1,4 +1,4 @@
-import { UserList } from '../userList/userList';
+import { UserList } from '../userList/UserList';
 
 export class ULI {
   constructor(

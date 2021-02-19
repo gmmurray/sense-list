@@ -19,7 +19,9 @@ import { getList, updateList } from 'src/library/api/backend/lists';
 import WrappedCheckbox from 'src/library/components/form/WrappedCheckbox';
 import WrappedTextInput from 'src/library/components/form/WrappedTextInput';
 import { BookList } from 'src/library/entities/list/bookList';
+import { BookListItem } from 'src/library/entities/listItem/BookListItem';
 import { appRoutes } from 'src/main/routes';
+import NewListItemModal from './newItemModal/NewListItemModal';
 import { editListSchema, IEditListInputs } from './schema';
 
 type ViewListParams = {
@@ -35,6 +37,7 @@ const ViewList = () => {
   const [readOnly, setReadOnly] = useState(true);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const { handleSubmit, errors, control, reset } = useForm<IEditListInputs>({
     resolver: yupResolver(editListSchema),
@@ -75,6 +78,11 @@ const ViewList = () => {
     setReadOnly(true);
   }, [reset, setReadOnly]);
 
+  const handleItemSubmission = useCallback(() => {
+    handleFormReset();
+    getListData();
+  }, [handleFormReset, getListData]);
+
   useEffect(() => {
     if (listId) {
       getListData();
@@ -86,6 +94,10 @@ const ViewList = () => {
   }
 
   const canEdit = auth.user && auth.user.sub === list?.ownerId;
+  const excludedBookIds =
+    list && list.bookListItems
+      ? (list?.bookListItems as BookListItem[]).map(book => book.volumeId)
+      : [];
   return (
     <Fragment>
       {listLoading && (
@@ -169,6 +181,7 @@ const ViewList = () => {
                 label="Public"
                 toggle
                 readOnly={readOnly}
+                disabled={readOnly}
               />
             </Form.Field>
             {!readOnly && (
@@ -184,8 +197,13 @@ const ViewList = () => {
               Books
             </Header>
           </Divider>
-          {list.bookListItems.length === 0 && canEdit && (
-            <Button icon="plus" primary content="Add a book" />
+          {canEdit && (
+            <Button
+              icon="plus"
+              primary
+              content="Add a book"
+              onClick={() => setModalOpen(true)}
+            />
           )}
           {list.bookListItems.length === 0 && !canEdit && (
             <Container>
@@ -194,6 +212,15 @@ const ViewList = () => {
           )}
         </Segment>
       )}
+      <NewListItemModal
+        open={modalOpen}
+        onOpen={() => setModalOpen(true)}
+        onClose={() => setModalOpen(false)}
+        onModalSubmitted={handleItemSubmission}
+        listId={listId}
+        newOrdinal={list ? list.bookListItems.length : 0}
+        excludedBookIds={excludedBookIds}
+      />
     </Fragment>
   );
 };

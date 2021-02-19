@@ -1,5 +1,5 @@
 import { BookReadingStatus } from 'src/library/types/BookReadingStatus';
-import { BookUserList } from '../userList/bookUserList';
+import { BookUserList } from '../userList/BookUserList';
 import { ULI } from './UserListItem';
 
 export class BULI extends ULI {
