@@ -10,7 +10,7 @@ export type authenticatedRequestParams = {
   params?: AxiosRequestConfig['params'];
 };
 
-const axiosClient = axios.create({ timeout: 1000 });
+const axiosClient = axios.create({ timeout: 5000 });
 
 export const authenticatedRequest = async ({
   authContext,

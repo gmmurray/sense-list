@@ -1,5 +1,5 @@
 import { ListType } from '../../types/ListType';
-import { BookListItem } from '../listItem/bookListItem';
+import { BookListItem } from '../listItem/BookListItem';
 import { List } from './list';
 
 export class BookList extends List {

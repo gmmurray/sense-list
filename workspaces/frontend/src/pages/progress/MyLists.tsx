@@ -138,7 +138,7 @@ const MyLists: FC<MyListsProps> = ({ loading, data }) => {
         <Fragment>
           <Menu>
             <Menu.Item as={Link} to={appRoutes.lists.new.path}>
-              Create
+              New
             </Menu.Item>
             <Menu.Menu position="right">
               <Menu.Item>

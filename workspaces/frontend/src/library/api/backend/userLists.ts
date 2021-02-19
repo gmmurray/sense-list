@@ -1,5 +1,5 @@
 import { Auth0ContextInterface } from '@auth0/auth0-react';
-import { BookUserList } from 'src/library/entities/userList/bookUserList';
+import { BookUserList } from 'src/library/entities/userList/BookUserList';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { authenticatedRequest } from '.';
 

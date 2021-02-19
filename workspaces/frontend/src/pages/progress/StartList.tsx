@@ -43,7 +43,7 @@ const StartList = () => {
       setMyListsLoading(false);
       getPublicLists();
     }
-  }, [activeIndex]);
+  }, [activeIndex]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleTabChange = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,

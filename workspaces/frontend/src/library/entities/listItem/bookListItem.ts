@@ -1,6 +1,6 @@
 import { ListType } from 'src/library/types/ListType';
 import { BookList } from '../list/bookList';
-import { BookListItemMeta } from './bookListItemMeta';
+import { BookListItemMeta } from './BookListItemMeta';
 
 export class BookListItem {
   constructor(
