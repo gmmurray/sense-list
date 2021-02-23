@@ -12,6 +12,8 @@ import {
   Segment,
 } from 'semantic-ui-react';
 import { getHomePageUserLists } from 'src/library/api/backend/userLists';
+import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
+import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
 import { BookUserList } from 'src/library/entities/userList/BookUserList';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { appRoutes } from 'src/main/routes';
@@ -31,7 +33,7 @@ const Home = () => {
         const data = await getHomePageUserLists(auth);
         setActiveLists(data);
       } catch (error) {
-        alert.error(error.message, { timeout: 15000 });
+        alert.error(error.message, defaultErrorTimeout);
       } finally {
         setActiveListsLoading(false);
       }
@@ -41,6 +43,7 @@ const Home = () => {
   }, []);
   return (
     <Fragment>
+      <BreadcrumbWrapper breadcrumbs={appRoutes.home.index.breadcrumbs!} />
       <Header as="h1">Active Lists</Header>
       {activeListsLoading && (
         <Segment loading>

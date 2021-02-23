@@ -6,11 +6,19 @@ export type RenderWithLocationType = {
   };
 };
 
+export type RouteBreadcrumb = {
+  name: string;
+  to?: string;
+  root?: boolean;
+};
+
 export type RouteDeclaration = {
+  name: string;
   path: string;
   render: (props: any) => JSX.Element;
   isPrivate: boolean;
   exact: boolean;
+  breadcrumbs?: RouteBreadcrumb[];
   getDynamicPath?: (...args: string[]) => string;
 };
 
