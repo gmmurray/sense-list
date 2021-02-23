@@ -13,6 +13,7 @@ import { useAuth0 } from '@auth0/auth0-react';
 import { useHistory } from 'react-router-dom';
 import { appRoutes } from 'src/main/routes';
 import { useAlert } from 'react-alert';
+import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
 
 const NewList = () => {
   const auth = useAuth0();
@@ -42,6 +43,7 @@ const NewList = () => {
   };
   return (
     <Fragment>
+      <BreadcrumbWrapper breadcrumbs={appRoutes.lists.new.breadcrumbs!} />
       <Header as="h1">Create your book list</Header>
       <Segment>
         <Form

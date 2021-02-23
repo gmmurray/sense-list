@@ -1,11 +1,21 @@
 import { useAuth0 } from '@auth0/auth0-react';
 import React, { useEffect, useState } from 'react';
+import { Fragment } from 'react';
 import { useAlert } from 'react-alert';
-import { Segment, Tab, TabPaneProps, TabProps } from 'semantic-ui-react';
+import {
+  Container,
+  Segment,
+  Tab,
+  TabPaneProps,
+  TabProps,
+} from 'semantic-ui-react';
 import { SemanticShorthandItem } from 'semantic-ui-react/dist/commonjs/generic';
 import { getPrivateLists } from 'src/library/api/backend/lists';
+import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
+import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
 import { BookList } from 'src/library/entities/list/bookList';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
+import { appRoutes } from 'src/main/routes';
 import MyLists from './MyLists';
 
 const getPublicLists = () => console.log('public');
@@ -32,7 +42,7 @@ const StartList = () => {
         const data = await getPrivateLists(auth);
         setMyLists(data);
       } catch (error) {
-        alert.error(error.message, { timeout: 15000 });
+        alert.error(error.message, defaultErrorTimeout);
       } finally {
         setMyListsLoading(false);
       }
@@ -73,11 +83,19 @@ const StartList = () => {
     },
   ];
   return (
-    <Tab
-      menu={{ fluid: true, vertical: true, secondary: true, pointing: true }}
-      panes={panes}
-      onTabChange={handleTabChange}
-    />
+    <Fragment>
+      <Container style={{ marginBottom: '2rem' }}>
+        <BreadcrumbWrapper
+          breadcrumbs={appRoutes.progress.start.breadcrumbs!}
+        />
+      </Container>
+
+      <Tab
+        menu={{ fluid: true, vertical: true, secondary: true, pointing: true }}
+        panes={panes}
+        onTabChange={handleTabChange}
+      />
+    </Fragment>
   );
 };
 

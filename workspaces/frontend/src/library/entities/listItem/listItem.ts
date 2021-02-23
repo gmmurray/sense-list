@@ -11,3 +11,13 @@ export class ListItem {
     public updatedAt: Date,
   ) {}
 }
+
+export type ListItemOrdinalUpdate = {
+  listItemId: string;
+  ordinal: number;
+};
+
+export type UpdateListItemOrdinalsDto = {
+  listId: string;
+  ordinalUpdates: ListItemOrdinalUpdate[];
+};

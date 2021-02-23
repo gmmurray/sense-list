@@ -2,8 +2,11 @@ import React, { FC, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Container,
+  Grid,
+  Header,
   Icon,
   Image,
+  List,
   Menu,
   Segment,
   Sidebar,
@@ -74,7 +77,14 @@ const PageLayout: FC<PageLayoutType> = ({ children }) => {
             Progress
           </Menu.Item>
         </Sidebar>
-        <Sidebar.Pusher dimmed={navOpen} style={{ minHeight: '100vh' }}>
+        <Sidebar.Pusher
+          dimmed={navOpen}
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
           <Menu fixed="top" inverted>
             <Menu.Item
               onClick={() => setNavOpen(!navOpen)}
@@ -98,9 +108,55 @@ const PageLayout: FC<PageLayoutType> = ({ children }) => {
               </Menu.Menu>
             </Container>
           </Menu>
-          <Container text style={{ marginTop: '7rem' }}>
+          <Container text style={{ marginTop: '7rem', flex: 1 }}>
             {children}
           </Container>
+          <Segment
+            inverted
+            style={{ padding: '5rem 0', border: 'none', borderRadius: 0 }}
+          >
+            <Container>
+              <Grid divided inverted stackable>
+                <Grid.Row>
+                  <Grid.Column width={3}>
+                    <Header inverted as="h4" content="Other sites" />
+                    <List link inverted>
+                      <List.Item as="a">Coffee</List.Item>
+                      <List.Item as="a">Exploration</List.Item>
+                    </List>
+                  </Grid.Column>
+                  <Grid.Column width={3}>
+                    <Header inverted as="h4" content="About the creator" />
+                    <List link inverted>
+                      <List.Item
+                        as="a"
+                        href="https://github.com/gmmurray"
+                        target="_blank"
+                      >
+                        GitHub
+                      </List.Item>
+                      <List.Item
+                        as="a"
+                        href="https://gregmurray.org"
+                        target="_blank"
+                      >
+                        Personal website
+                      </List.Item>
+                    </List>
+                  </Grid.Column>
+                  <Grid.Column width={7}>
+                    <Header as="h4" inverted>
+                      SenseList Books
+                    </Header>
+                    <p>
+                      The easiest way to create and keep track of your reading
+                      lists
+                    </p>
+                  </Grid.Column>
+                </Grid.Row>
+              </Grid>
+            </Container>
+          </Segment>
         </Sidebar.Pusher>
       </Sidebar.Pushable>
     </div>

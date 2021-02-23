@@ -10,6 +10,7 @@ import progressRoutes from './progress';
 
 const flattenRouteTree = (routes: RouteTree) =>
   Object.keys(routes).map(key => ({
+    name: routes[key].name,
     path: routes[key].path,
     render: routes[key].render,
     isPrivate: routes[key].isPrivate,

@@ -8,6 +8,7 @@ const routePrefix = '/auth';
 
 const authRoutes: RouteTree = {
   login: {
+    name: 'Auth',
     path: `/login`,
     render: ({
       location,
@@ -18,12 +19,15 @@ const authRoutes: RouteTree = {
     >) => <Login from={location?.state?.from ?? null} />,
     isPrivate: false,
     exact: true,
+    breadcrumbs: [],
   },
   logout: {
+    name: 'Auth',
     path: `/logout`,
     render: () => <Logout />,
     isPrivate: false,
     exact: true,
+    breadcrumbs: [],
   },
 };
 

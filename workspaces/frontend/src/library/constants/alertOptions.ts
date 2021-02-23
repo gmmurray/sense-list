@@ -7,4 +7,5 @@ const alertOptions = {
   offset: '100px',
 };
 
+export const defaultErrorTimeout = { timeout: 15000 };
 export default alertOptions;

@@ -4,25 +4,35 @@ import React, { Fragment, useCallback, useEffect, useState } from 'react';
 import { useAlert } from 'react-alert';
 import { useForm } from 'react-hook-form';
 import { Link, Redirect, useParams } from 'react-router-dom';
+import arrayMove from 'array-move';
 import {
   Segment,
   Placeholder,
   Header,
   Button,
   Icon,
-  Form,
-  Message,
-  Container,
   Divider,
+  Confirm,
 } from 'semantic-ui-react';
+import {
+  deleteBookListItem,
+  updateListItemOrdinals,
+} from 'src/library/api/backend/listItems';
 import { getList, updateList } from 'src/library/api/backend/lists';
-import WrappedCheckbox from 'src/library/components/form/WrappedCheckbox';
-import WrappedTextInput from 'src/library/components/form/WrappedTextInput';
+import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
+import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
 import { BookList } from 'src/library/entities/list/bookList';
 import { BookListItem } from 'src/library/entities/listItem/BookListItem';
 import { appRoutes } from 'src/main/routes';
-import NewListItemModal from './newItemModal/NewListItemModal';
+import NewListItemModal from './modal/NewListItemModal';
 import { editListSchema, IEditListInputs } from './schema';
+import ViewListBooks from './books/ViewListBooks';
+import ViewListForm from './ViewListForm';
+import {
+  ListItemOrdinalUpdate,
+  UpdateListItemOrdinalsDto,
+} from 'src/library/entities/listItem/ListItem';
+import { onSortEndParams } from 'src/library/types/reactSortableHoc';
 
 type ViewListParams = {
   listId: string;
@@ -34,10 +44,22 @@ const ViewList = () => {
   const { listId } = useParams<ViewListParams>();
   const [list, setList] = useState<BookList | null>(null);
   const [listLoading, setListLoading] = useState(true);
-  const [readOnly, setReadOnly] = useState(true);
-  const [updateLoading, setUpdateLoading] = useState(false);
+  const [isEditingForm, setIsEditingForm] = useState(false);
+  const [formUpdateLoading, setFormUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isEditingOrdinals, setIsEditingOrdinals] = useState(false);
+  const [itemDeletionLoading, setItemDeletionLoading] = useState(false);
+  const [itemDeletionConfirmOpen, setItemDeletionConfirmOpen] = useState(false);
+  const [itemToBeDeleted, setItemToBeDeleted] = useState<{
+    id: string;
+    title: string;
+    authors: string;
+  } | null>(null);
+  const [itemOrdinalChanges, setItemOrdinalChanges] = useState<
+    ListItemOrdinalUpdate[]
+  >([]);
+  const [ordinalChangesLoading, setOrdinalChangesLoading] = useState(false);
 
   const { handleSubmit, errors, control, reset } = useForm<IEditListInputs>({
     resolver: yupResolver(editListSchema),
@@ -49,39 +71,117 @@ const ViewList = () => {
       const data = await getList(auth, listId);
       setList(data);
     } catch (error) {
-      alert.error(error.message, { timeout: 15000 });
+      alert.error(error.message, defaultErrorTimeout);
     } finally {
       setListLoading(false);
     }
   }, [setListLoading, setList, alert, auth, listId]);
 
-  const onSubmit = useCallback(
+  const handleFormSubmit = useCallback(
     async (data: IEditListInputs) => {
-      setUpdateLoading(true);
+      setFormUpdateLoading(true);
       setUpdateError(null);
       try {
         await updateList(auth, listId, data);
         await getListData();
-        setReadOnly(true);
+        setIsEditingForm(false);
         alert.success('List successfully saved');
       } catch (error) {
-        alert.error(error.message, { timeout: 15000 });
+        setUpdateError('There was an error saving your changes.');
       } finally {
-        setUpdateLoading(false);
+        setFormUpdateLoading(false);
       }
     },
-    [getListData, setUpdateLoading, setUpdateError, alert, auth, listId],
+    [getListData, setFormUpdateLoading, setUpdateError, alert, auth, listId],
   );
 
   const handleFormReset = useCallback(() => {
     reset();
-    setReadOnly(true);
-  }, [reset, setReadOnly]);
+    setIsEditingForm(false);
+  }, [reset, setIsEditingForm]);
 
   const handleItemSubmission = useCallback(() => {
     handleFormReset();
     getListData();
   }, [handleFormReset, getListData]);
+
+  const handleItemDeletionClick = useCallback(
+    (item: { id: string; title: string; authors: string }) => {
+      setItemDeletionConfirmOpen(true);
+      setItemToBeDeleted(item);
+    },
+    [setItemDeletionConfirmOpen, setItemToBeDeleted],
+  );
+
+  const handleItemDeletion = useCallback(
+    async (listItemId: string) => {
+      setItemDeletionConfirmOpen(false);
+      setItemDeletionLoading(true);
+      try {
+        await deleteBookListItem(auth, listItemId);
+        await getListData();
+      } catch (error) {
+        alert.error(error.message, defaultErrorTimeout);
+      } finally {
+        setItemDeletionLoading(false);
+      }
+    },
+    [getListData, setItemDeletionLoading, auth, alert],
+  );
+
+  const handleItemSort = useCallback(
+    ({ oldIndex, newIndex }: onSortEndParams) => {
+      if (list && list.bookListItems) {
+        const bookListItems = arrayMove(
+          list?.bookListItems as BookListItem[],
+          oldIndex,
+          newIndex,
+        ).map((item, index) => ({ ...item, ordinal: index }));
+        const updated = { ...list, bookListItems };
+        setList(updated);
+        setItemOrdinalChanges(
+          bookListItems.map(({ id, ordinal }) => ({ listItemId: id, ordinal })),
+        );
+      }
+    },
+    [list, setList],
+  );
+
+  const handleSaveOrdinals = useCallback(async () => {
+    if (list) {
+      setOrdinalChangesLoading(true);
+      try {
+        const data: UpdateListItemOrdinalsDto = {
+          listId: list.id,
+          ordinalUpdates: itemOrdinalChanges,
+        };
+        await updateListItemOrdinals(auth, data);
+        await getListData();
+      } catch (error) {
+        alert.error(error.messge, defaultErrorTimeout);
+      } finally {
+        setOrdinalChangesLoading(false);
+        setItemOrdinalChanges([]);
+        setIsEditingOrdinals(false);
+      }
+    }
+  }, [
+    alert,
+    auth,
+    getListData,
+    itemOrdinalChanges,
+    list,
+    setItemOrdinalChanges,
+    setOrdinalChangesLoading,
+  ]);
+
+  const handleCancelOrdinalUpdates = useCallback(() => {
+    if (itemOrdinalChanges.length > 0) {
+      getListData();
+    }
+    setItemOrdinalChanges([]);
+    setIsEditingOrdinals(false);
+  }, [getListData, setItemOrdinalChanges, itemOrdinalChanges]);
 
   useEffect(() => {
     if (listId) {
@@ -89,18 +189,17 @@ const ViewList = () => {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!listId) {
-    return <Redirect to={appRoutes.progress.start.path} />;
-  }
-
-  const canEdit = auth.user && auth.user.sub === list?.ownerId;
+  const hasEditPermission = auth.user && auth.user.sub === list?.ownerId;
   const excludedBookIds =
     list && list.bookListItems
       ? (list?.bookListItems as BookListItem[]).map(book => book.volumeId)
       : [];
-  return (
-    <Fragment>
-      {listLoading && (
+
+  if (!listId) {
+    return <Redirect to={appRoutes.progress.start.path} />;
+  } else if (listLoading) {
+    return (
+      <Fragment>
         <Segment loading>
           <Placeholder>
             <Placeholder.Line />
@@ -110,118 +209,104 @@ const ViewList = () => {
             <Placeholder.Line />
           </Placeholder>
         </Segment>
-      )}
-      {!listLoading && !list && (
-        <Segment placeholder>
-          <Header icon>
-            <Icon name="search" />
-            That list could not be found
-          </Header>
-          <Button primary as={Link} to={appRoutes.home.index.path}>
-            Return home
-          </Button>
-        </Segment>
-      )}
-      {!listLoading && list && (
-        <Segment color={!readOnly ? 'green' : undefined}>
-          {canEdit && (
+      </Fragment>
+    );
+  } else if (list) {
+    return (
+      <Fragment>
+        <BreadcrumbWrapper breadcrumbs={appRoutes.lists.view.breadcrumbs!} />
+        <Segment color={isEditingForm ? 'green' : undefined}>
+          {hasEditPermission && (
             <div>
               <Button
+                icon={isEditingForm ? 'cancel' : 'edit'}
+                content={isEditingForm ? 'Cancel' : 'Edit'}
                 floated="right"
-                toggle
                 compact
-                active={!readOnly}
                 onClick={
-                  readOnly ? () => setReadOnly(false) : () => handleFormReset()
+                  isEditingForm
+                    ? () => handleFormReset()
+                    : () => setIsEditingForm(true)
                 }
-              >
-                {readOnly ? 'Edit' : 'Cancel'}
-              </Button>
+              />
               <br />
             </div>
           )}
-          <Form
-            size="big"
-            onSubmit={handleSubmit(onSubmit)}
-            error={!!updateError}
-            loading={updateLoading}
-          >
-            <WrappedTextInput
-              name="title"
-              control={control}
-              defaultValue={list.title}
-              label="Title"
-              placeholder="My reading list"
-              error={errors.title?.message}
-              readOnly={readOnly}
-            />
-            <WrappedTextInput
-              name="category"
-              control={control}
-              defaultValue={list.category}
-              label="Category"
-              placeholder="Fantasy"
-              error={errors.category?.message}
-              readOnly={readOnly}
-            />
-            <WrappedTextInput
-              name="description"
-              control={control}
-              defaultValue={list.description}
-              label="Description"
-              placeholder="The best way to read these books!"
-              error={errors.description?.message}
-              readOnly={readOnly}
-            />
-            <Form.Field error={errors.isPublic?.message}>
-              <WrappedCheckbox
-                name="isPublic"
-                control={control}
-                defaultValue={list.isPublic}
-                label="Public"
-                toggle
-                readOnly={readOnly}
-                disabled={readOnly}
-              />
-            </Form.Field>
-            {!readOnly && (
-              <Button type="submit" primary>
-                Save
-              </Button>
-            )}
-            <Message error header="Error" content={updateError} />
-          </Form>
+          <ViewListForm
+            list={list}
+            active={isEditingForm}
+            loading={formUpdateLoading}
+            error={updateError}
+            formErrors={errors}
+            formControl={control}
+            onSubmit={handleSubmit(handleFormSubmit)}
+            onReset={handleFormReset}
+          />
           <Divider horizontal>
             <Header as="h4">
               <Icon name="book" />
               Books
             </Header>
           </Divider>
-          {canEdit && (
-            <Button
-              icon="plus"
-              primary
-              content="Add a book"
-              onClick={() => setModalOpen(true)}
-            />
-          )}
-          {list.bookListItems.length === 0 && !canEdit && (
-            <Container>
-              The creator of this list hasn't added any books yet!
-            </Container>
-          )}
+          <ViewListBooks
+            items={list.bookListItems}
+            ordinalChanges={itemOrdinalChanges}
+            canEdit={hasEditPermission}
+            listLoading={listLoading}
+            active={isEditingOrdinals}
+            deleteLoading={itemDeletionLoading}
+            changesLoading={ordinalChangesLoading}
+            onModalOpen={() => setModalOpen(true)}
+            onActiveToggle={
+              isEditingOrdinals
+                ? () => setIsEditingOrdinals(false)
+                : () => setIsEditingOrdinals(true)
+            }
+            onDelete={handleItemDeletionClick}
+            onSortEnd={handleItemSort}
+            onSave={handleSaveOrdinals}
+            onReset={handleCancelOrdinalUpdates}
+          />
         </Segment>
-      )}
-      <NewListItemModal
-        open={modalOpen}
-        onOpen={() => setModalOpen(true)}
-        onClose={() => setModalOpen(false)}
-        onModalSubmitted={handleItemSubmission}
-        listId={listId}
-        newOrdinal={list ? list.bookListItems.length : 0}
-        excludedBookIds={excludedBookIds}
-      />
-    </Fragment>
+        <NewListItemModal
+          open={modalOpen}
+          onOpen={() => setModalOpen(true)}
+          onClose={() => setModalOpen(false)}
+          onModalSubmitted={handleItemSubmission}
+          listId={listId}
+          newOrdinal={list ? list.bookListItems.length : 0}
+          excludedBookIds={excludedBookIds}
+        />
+        <Confirm
+          open={itemDeletionConfirmOpen}
+          onCancel={() => setItemDeletionConfirmOpen(false)}
+          onConfirm={
+            itemToBeDeleted
+              ? () => handleItemDeletion(itemToBeDeleted.id)
+              : undefined
+          }
+          cancelButton="Nevermind"
+          confirmButton="Yes"
+          header="Confirm"
+          content={
+            itemToBeDeleted
+              ? `Are you sure you want to remove ${itemToBeDeleted.title} by ${itemToBeDeleted.authors}?`
+              : undefined
+          }
+        />
+      </Fragment>
+    );
+  }
+  return (
+    <Segment placeholder>
+      <Header icon>
+        <Icon name="search" />
+        That list could not be found
+      </Header>
+      <Button primary as={Link} to={appRoutes.home.index.path}>
+        Return home
+      </Button>
+    </Segment>
   );
 };
 
