@@ -13,6 +13,7 @@ import {
 } from 'semantic-ui-react';
 import { appRoutes } from 'src/main/routes';
 import LogoutButton from '../auth/LogoutButton';
+import Logo from '../../assets/images/logo_checkmark.png';
 
 type PageLayoutType = { children: JSX.Element };
 
@@ -96,7 +97,7 @@ const PageLayout: FC<PageLayoutType> = ({ children }) => {
               <Menu.Item as={Link} to={appRoutes.home.index.path} header>
                 <Image
                   size="mini"
-                  src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
+                  src={Logo}
                   style={{ marginRight: '1.5em' }}
                 />
                 SenseList Books
