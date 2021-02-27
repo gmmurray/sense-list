@@ -1,5 +1,5 @@
 import { Auth0ContextInterface } from '@auth0/auth0-react';
-import { BookList } from 'src/library/entities/list/bookList';
+import { BookList, QueryBookListDto } from 'src/library/entities/list/bookList';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { INewListInputs } from 'src/pages/lists/new/schema';
 import { IEditListInputs } from 'src/pages/lists/view/schema';
@@ -15,6 +15,18 @@ export const getPrivateLists = async (
     method: 'GET',
     url: listsRoute,
     params: { ownerOnly: true },
+  });
+};
+
+export const getPublicListsByQuery = async (
+  authContext: Auth0ContextInterface,
+  query: QueryBookListDto,
+): Promise<DataTotalResponse<BookList>> => {
+  return await authenticatedRequest({
+    authContext,
+    method: 'GET',
+    url: listsRoute,
+    params: { ...query },
   });
 };
 

@@ -227,25 +227,7 @@ const NewListItemModal: FC<NewListItemModalProps> = ({
     handleReset();
   }, [open, handleReset]);
 
-  const isValidBook =
-    !!selectedBook &&
-    selectedBook.volumeInfo.industryIdentifiers.some(
-      identifier =>
-        identifier.type === GoogleApiIndustryIdentifierType.isbn10 ||
-        identifier.type === GoogleApiIndustryIdentifierType.isbn13,
-    );
-
-  useEffect(() => {
-    if (selectedBook && !isValidBook) {
-      setError({
-        ...error,
-        search: `This book does not have a ISBN and therefore we unfortunately can't
-      use it. Please choose another one.`,
-      });
-    } else {
-      setError({ ...error, search: DEFAULT_ERROR_STATE.search });
-    }
-  }, [selectedBook, isValidBook]); // eslint-disable-line react-hooks/exhaustive-deps
+  const isValidBook = !!selectedBook;
 
   return (
     <Modal onOpen={onOpen} onClose={onClose} open={open} closeIcon>

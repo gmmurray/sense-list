@@ -129,6 +129,7 @@ const SearchMenu: FC<SearchMenuProps> = ({
           placeholder="Search..."
           value={searchTerm}
           onChange={onSearchTermChange}
+          disabled={loading}
           action
         >
           <input />

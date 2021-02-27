@@ -1,6 +1,6 @@
 import { ListType } from '../../types/ListType';
 import { BookListItem } from '../listItem/BookListItem';
-import { List } from './list';
+import { List, QueryListDto } from './list';
 
 export class BookList extends List {
   constructor(
@@ -26,5 +26,12 @@ export class BookList extends List {
       createdAt,
       updatedAt,
     );
+  }
+}
+
+export class QueryBookListDto extends QueryListDto {
+  constructor(searchTerm: string, ownerOnly: boolean) {
+    const value = searchTerm || undefined;
+    super(value, value, value, ListType.Book, ownerOnly);
   }
 }
