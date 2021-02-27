@@ -3,7 +3,7 @@ import { Card, Image } from 'semantic-ui-react';
 import { GoogleApiBook } from 'src/library/entities/googleBooks/GoogleApiBook';
 import {
   combineAuthors,
-  truncateDescription,
+  truncateString,
 } from 'src/library/utilities/bookPropertyHelpers';
 
 type SearchResultProps = {
@@ -34,7 +34,7 @@ const SearchResult: FC<SearchResultProps> = ({
         <Card.Header>{title}</Card.Header>
         <Card.Meta>{author}</Card.Meta>
         <Card.Description>
-          {description && truncateDescription(description, 200)}
+          {description && truncateString(description, 200)}
         </Card.Description>
       </Card.Content>
       <Card.Content extra>{pageCount} pages</Card.Content>

@@ -4,7 +4,7 @@ import { Item, Label, Button } from 'semantic-ui-react';
 import { BookListItem } from 'src/library/entities/listItem/BookListItem';
 import {
   combineAuthors,
-  truncateDescription,
+  truncateString,
 } from 'src/library/utilities/bookPropertyHelpers';
 import { removeHTMLTags } from 'src/library/utilities/stringHelpers';
 
@@ -32,7 +32,7 @@ export const ListItemCard: FC<ListItemCardProps> = ({
   } = item;
   const combinedAuthors = combineAuthors(authors);
   const cleanedDescription = removeHTMLTags(description);
-  const truncatedDescription = truncateDescription(cleanedDescription, 150);
+  const truncatedDescription = truncateString(cleanedDescription, 150);
   return (
     <Item as="div">
       {!hideImage && <Item.Image size="tiny" src={thumbnail_url} />}

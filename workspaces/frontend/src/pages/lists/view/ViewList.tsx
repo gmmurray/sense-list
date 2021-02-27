@@ -21,7 +21,7 @@ import {
 import { getList, updateList } from 'src/library/api/backend/lists';
 import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
-import { BookList } from 'src/library/entities/list/bookList';
+import { BookList } from 'src/library/entities/list/BookList';
 import { BookListItem } from 'src/library/entities/listItem/BookListItem';
 import { appRoutes } from 'src/main/routes';
 import NewListItemModal from './modal/NewListItemModal';
@@ -124,6 +124,7 @@ const ViewList = () => {
         alert.error(error.message, defaultErrorTimeout);
       } finally {
         setItemDeletionLoading(false);
+        setItemToBeDeleted(null);
       }
     },
     [getListData, setItemDeletionLoading, auth, alert],
@@ -212,6 +213,10 @@ const ViewList = () => {
       </Fragment>
     );
   } else if (list) {
+    const newItemOrdinal =
+      (list.bookListItems as BookListItem[]).sort(
+        (a, b) => a.ordinal - b.ordinal,
+      )[list.bookListItems.length - 1].ordinal + 1;
     return (
       <Fragment>
         <BreadcrumbWrapper breadcrumbs={appRoutes.lists.view.breadcrumbs!} />
@@ -274,7 +279,7 @@ const ViewList = () => {
           onClose={() => setModalOpen(false)}
           onModalSubmitted={handleItemSubmission}
           listId={listId}
-          newOrdinal={list ? list.bookListItems.length : 0}
+          newOrdinal={newItemOrdinal}
           excludedBookIds={excludedBookIds}
         />
         <Confirm

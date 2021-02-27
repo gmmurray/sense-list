@@ -2,7 +2,7 @@ import React from 'react';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, Icon } from 'semantic-ui-react';
-import { BookList } from 'src/library/entities/list/bookList';
+import { BookList } from 'src/library/entities/list/BookList';
 import { appRoutes } from 'src/main/routes';
 
 type ListCardProps = {

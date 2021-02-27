@@ -2,7 +2,10 @@ import React, { Fragment } from 'react';
 import { FC } from 'react';
 import { Modal, Image, Container, List, Header } from 'semantic-ui-react';
 import { GoogleApiBook } from 'src/library/entities/googleBooks/GoogleApiBook';
-import { combineAuthors } from 'src/library/utilities/bookPropertyHelpers';
+import {
+  combineAuthors,
+  truncateString,
+} from 'src/library/utilities/bookPropertyHelpers';
 
 type SelectedViewProps = {
   selectedBook: GoogleApiBook;
@@ -38,7 +41,7 @@ const SelectedView: FC<SelectedViewProps> = ({ selectedBook }) => {
               </List.Item>
             )}
           </List>
-          <p>{selectedBook.volumeInfo.description}</p>
+          <p>{truncateString(selectedBook.volumeInfo.description, 100)}</p>
           <Container textAlign="center"></Container>
         </Container>
       </Modal.Description>

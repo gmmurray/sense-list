@@ -1,4 +1,4 @@
-import { List } from '../list/list';
+import { List } from '../list/List';
 import { ULI } from '../uli/UserListItem';
 
 export class UserList {

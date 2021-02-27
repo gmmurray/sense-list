@@ -1,6 +1,6 @@
 import { ListType } from '../../types/ListType';
 import { BookListItem } from '../listItem/BookListItem';
-import { List, QueryListDto } from './list';
+import { List, QueryListDto } from './List';
 
 export class BookList extends List {
   constructor(

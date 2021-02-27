@@ -1,5 +1,5 @@
 import { ListType } from 'src/library/types/ListType';
-import { BookList } from '../list/bookList';
+import { BookList } from '../list/BookList';
 import { BookListItemMeta } from './BookListItemMeta';
 
 export class BookListItem {

@@ -1,5 +1,5 @@
 import { ListType } from 'src/library/types/ListType';
-import { List } from '../list/list';
+import { List } from '../list/List';
 
 export class ListItem {
   constructor(

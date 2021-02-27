@@ -5,7 +5,7 @@ import { Control, DeepMap, FieldError } from 'react-hook-form';
 import { Button, Form, Message } from 'semantic-ui-react';
 import WrappedCheckbox from 'src/library/components/form/WrappedCheckbox';
 import WrappedTextInput from 'src/library/components/form/WrappedTextInput';
-import { BookList } from 'src/library/entities/list/bookList';
+import { BookList } from 'src/library/entities/list/BookList';
 import { IEditListInputs } from './schema';
 
 type ViewListFormProps = {
