@@ -14,6 +14,8 @@ import { OpenLibraryModule } from 'src/openLibrary/openLibrary.module';
 import { UserListsModule } from 'src/userLists/userLists.module';
 import { UserListItemsModule } from 'src/userListItems/userListItems.module';
 import { createBookListItem, createList } from './mock/createDtos';
+import { UpdateListItemOrdinalsDto } from 'src/listItems/definitions/listItem.dto';
+import { BookListItemDto } from 'src/listItems/books/definitions/bookListItem.dto';
 
 const BASE_URL = '/books/list-items';
 
@@ -113,6 +115,93 @@ describe('Book List Items', () => {
       .expect(200)
       .then(res => {
         expect(res.body.id).toEqual(listItem.id);
+      });
+  });
+
+  it('/POST update multiple ordinals', async () => {
+    const item1 = {
+      ...createBookListItem,
+      list: list.id,
+    };
+    const item2 = {
+      ...createBookListItem,
+      list: list.id,
+      ordinal: 1,
+    };
+    const item3 = {
+      ...createBookListItem,
+      list: list.id,
+      ordinal: 2,
+    };
+    // Create three test items
+    let createdItem1: BookListItemDto;
+    await request(app.getHttpServer())
+      .post(BASE_URL)
+      .set('authorization', accessToken)
+      .send(item1)
+      .then(res => {
+        createdItem1 = res.body;
+      });
+    let createdItem2: BookListItemDto;
+    await request(app.getHttpServer())
+      .post(BASE_URL)
+      .set('authorization', accessToken)
+      .send(item2)
+      .then(res => {
+        createdItem2 = res.body;
+      });
+    let createdItem3: BookListItemDto;
+    await request(app.getHttpServer())
+      .post(BASE_URL)
+      .set('authorization', accessToken)
+      .send(item3)
+      .then(res => {
+        createdItem3 = res.body;
+      });
+
+    const updateRequest = new UpdateListItemOrdinalsDto(list.id, [
+      {
+        listItemId: createdItem1.id,
+        ordinal: 2,
+      },
+      {
+        listItemId: createdItem2.id,
+        ordinal: 1,
+      },
+      {
+        listItemId: createdItem3.id,
+        ordinal: 0,
+      },
+    ]);
+
+    await request(app.getHttpAdapter())
+      .post(`${BASE_URL}/updateOrdinals`)
+      .set('authorization', accessToken)
+      .send(updateRequest);
+
+    await request(app.getHttpServer())
+      .get(`${BASE_URL}/${createdItem1.id}`)
+      .set('authorization', accessToken)
+      .expect(200)
+      .then(res => {
+        expect(res.body.id).toEqual(listItem.id);
+        expect(res.body.ordinal).toEqual(2);
+      });
+    await request(app.getHttpServer())
+      .get(`${BASE_URL}/${createdItem2.id}`)
+      .set('authorization', accessToken)
+      .expect(200)
+      .then(res => {
+        expect(res.body.id).toEqual(listItem.id);
+        expect(res.body.ordinal).toEqual(1);
+      });
+    await request(app.getHttpServer())
+      .get(`${BASE_URL}/${createdItem3.id}`)
+      .set('authorization', accessToken)
+      .expect(200)
+      .then(res => {
+        expect(res.body.id).toEqual(listItem.id);
+        expect(res.body.ordinal).toEqual(0);
       });
   });
 

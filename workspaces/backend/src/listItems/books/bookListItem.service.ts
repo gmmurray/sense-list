@@ -35,6 +35,7 @@ import { AllUserListItemsService } from 'src/userListItems/allUserListItems.serv
 import { StringIdType } from 'src/common/types/stringIdType';
 import { GoogleBooksService } from 'src/googleBooks/googlebooks.service';
 import { GoogleApiBook } from 'src/googleBooks/GoogleApiBook';
+import { UpdateListItemOrdinalsDto } from '../definitions/listItem.dto';
 
 export class BookListItemsService extends ListItemsService<
   BookListItemDocument,
@@ -236,6 +237,18 @@ export class BookListItemsService extends ListItemsService<
   }
 
   /**
+   * Updates each list item's ordinal in a list of list items
+   * @param userId
+   * @param updates
+   */
+  async updateOrdinals(
+    userId: string,
+    updates: UpdateListItemOrdinalsDto,
+  ): Promise<void> {
+    return await super.updateListItemOrdinals(userId, updates);
+  }
+
+  /**
    * Deletes a book list item. Requires list-specific user delete access
    * @param userId
    * @param listItemId
@@ -279,30 +292,39 @@ export class BookListItemsService extends ListItemsService<
     queryDto: QueryBookListItemDto,
   ): FilterQuery<BookListItem> {
     const result: FilterQuery<BookListItem> = {};
-    if (Object.keys(queryDto).length) {
-      result['$or'] = [];
-      Object.keys(queryDto).forEach(key => {
-        switch (key) {
-          case 'ordinal':
-          case 'listType': {
-            result['$or'].push({
-              [key]: queryDto[key],
-            });
-            break;
+    let keys = Object.keys(queryDto);
+    if (keys.length) {
+      if (keys.includes('listType')) {
+        result['$and'] = [];
+        result['$and'].push({
+          ['listType']: queryDto['listType'],
+        });
+        keys = keys.filter(key => key !== 'listType');
+      }
+      if (keys.length) {
+        result['$or'] = [];
+        keys.forEach(key => {
+          switch (key) {
+            case 'ordinal': {
+              result['$or'].push({
+                [key]: queryDto[key],
+              });
+              break;
+            }
+            case 'author': {
+              result['$or'].push({
+                ['meta.authors']: { $regex: queryDto[key], $options: 'i' },
+              });
+              break;
+            }
+            default: {
+              result['$or'].push({
+                [`meta.${key}`]: { $regex: queryDto[key], $options: 'i' },
+              });
+            }
           }
-          case 'author': {
-            result['$or'].push({
-              ['meta.authors']: { $regex: queryDto[key], $options: 'i' },
-            });
-            break;
-          }
-          default: {
-            result['$or'].push({
-              [`meta.${key}`]: { $regex: queryDto[key], $options: 'i' },
-            });
-          }
-        }
-      });
+        });
+      }
     }
     return result;
   }

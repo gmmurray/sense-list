@@ -1,5 +1,3 @@
-import { GoogleApiBookSearchResponse } from './GoogleApiBookSearch';
-
 export class GoogleApiImageLinks {
   constructor(public smallThumbnail: string, public thumbnail: string) {}
 }
@@ -43,20 +41,23 @@ export class GoogleApiBook {
     industryIdentifiers: GoogleApiIndustryIdentifier[],
   ): string {
     let hasIsbn13 = false;
-    let isbn = '';
-    industryIdentifiers.forEach(identifier => {
-      if (identifier.type === GoogleApiIndustryIdentifierType.isbn13) {
-        hasIsbn13 = true;
-        isbn = identifier.identifier;
-        return;
-      } else if (
-        identifier.type === GoogleApiIndustryIdentifierType.isbn10 &&
-        !hasIsbn13
-      ) {
-        isbn = identifier.identifier;
-        return;
-      }
-    });
+    let isbn = 'none';
+    if (industryIdentifiers) {
+      industryIdentifiers.forEach(identifier => {
+        if (identifier.type === GoogleApiIndustryIdentifierType.isbn13) {
+          hasIsbn13 = true;
+          isbn = identifier.identifier;
+          return;
+        } else if (
+          identifier.type === GoogleApiIndustryIdentifierType.isbn10 &&
+          !hasIsbn13
+        ) {
+          isbn = identifier.identifier;
+          return;
+        }
+      });
+    }
+
     return isbn;
   }
 

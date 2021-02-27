@@ -316,19 +316,23 @@ export class ListsService {
    */
   private static getQueryFilter(queryListDto: QueryListDto): FilterQuery<List> {
     const result: FilterQuery<List> = {};
-    if (Object.keys(queryListDto).length) {
-      result['$or'] = [];
-      Object.keys(queryListDto).forEach(key => {
-        if (key === 'type') {
-          result['$or'].push({
-            [key]: queryListDto[key],
-          });
-        } else {
+    let keys = Object.keys(queryListDto);
+    if (keys.length) {
+      if (keys.includes('type')) {
+        result['$and'] = [];
+        result['$and'].push({
+          ['type']: queryListDto['type'],
+        });
+        keys = keys.filter(key => key !== 'type');
+      }
+      if (keys.length) {
+        result['$or'] = [];
+        keys.forEach(key => {
           result['$or'].push({
             [key]: { $regex: queryListDto[key], $options: 'i' },
           });
-        }
-      });
+        });
+      }
     }
     return result;
   }

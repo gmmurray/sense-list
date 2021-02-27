@@ -22,6 +22,7 @@ import { AuthRequest } from 'src/authz/authzUser';
 import { Permissions } from 'src/authz/permissions.decorator';
 import { PermissionsGuard } from 'src/authz/permissions.guard';
 import { DataTotalResponse } from 'src/common/types/responseWrappers';
+import { UpdateListItemOrdinalsDto } from '../definitions/listItem.dto';
 import { BookListItemsService } from './bookListItem.service';
 import {
   BookListItemDto,
@@ -91,6 +92,25 @@ export class BookListItemsController {
   ): Promise<BookListItemDto> {
     const userId = user.sub;
     return await this.bookListItemsService.create(createListItemDto, userId);
+  }
+
+  /**
+   * Updates each list item's ordinal in a list of list items
+   * @param user - provided by access token
+   * @param updates
+   */
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @Post('/updateOrdinals')
+  @Permissions(ListItemApiPermissions.write)
+  async updateOrdinals(
+    @Req() { user }: AuthRequest,
+    @Body() updates: UpdateListItemOrdinalsDto,
+  ): Promise<void> {
+    const userId = user.sub;
+    return await this.bookListItemsService.updateListItemOrdinals(
+      userId,
+      updates,
+    );
   }
 
   /**

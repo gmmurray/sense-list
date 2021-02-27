@@ -23,6 +23,7 @@ import { ListsService } from 'src/lists/lists.service';
 import { AllUserListItemsService } from 'src/userListItems/allUserListItems.service';
 import { ListItemDocument } from './definitions/listItem.schema';
 import { StringIdType } from 'src/common/types/stringIdType';
+import { UpdateListItemOrdinalsDto } from './definitions/listItem.dto';
 
 @Injectable()
 export abstract class ListItemsService<
@@ -68,6 +69,54 @@ export abstract class ListItemsService<
     listItemId: string,
     patchDto: P,
   ): Promise<void>;
+
+  /**
+   * Updates each list item's ordinal in a list of list items
+   * @param userId
+   * @param updates
+   */
+  async updateListItemOrdinals(
+    userId: string,
+    updates: UpdateListItemOrdinalsDto,
+  ): Promise<void> {
+    try {
+      if (!updates.listId || !updates.ordinalUpdates)
+        throw new MongooseError.DocumentNotFoundError(null);
+
+      validateObjectId(updates.listId);
+      for (const listItemId of updates.ordinalUpdates.map(
+        update => update.listItemId,
+      )) {
+        validateObjectId(listItemId);
+      }
+
+      const list = await this.hasListItemWriteAccess(userId, updates.listId);
+      if (!list) throw new MongooseError.DocumentNotFoundError(null);
+      if (
+        !ListItemsService.validListItemOrdinals(
+          list.bookListItems.length,
+          updates.ordinalUpdates.map(update => update.ordinal),
+        )
+      )
+        throw new MongooseError.ValidationError(null);
+      await this.dbConnection.startSession();
+      await this.dbConnection.transaction(async () => {
+        const bulkUpdates = [];
+        for (const update of updates.ordinalUpdates) {
+          const operation = {
+            updateOne: {
+              filter: { _id: new Types.ObjectId(update.listItemId) },
+              update: { ordinal: update.ordinal },
+            },
+          };
+          bulkUpdates.push(operation);
+        }
+        await this.model.bulkWrite(bulkUpdates);
+      });
+    } catch (error) {
+      handleHttpRequestError(error);
+    }
+  }
 
   async delete(
     userId: string,
@@ -169,6 +218,18 @@ export abstract class ListItemsService<
     listId: StringIdType,
   ): Promise<ListDocument> {
     return await this.listsService.getListWithReadAccess(userId, listId);
+  }
+
+  //#endregion
+
+  //#region private methods
+
+  private static validListItemOrdinals(
+    listLength: number,
+    givenOrdinals: number[],
+  ): boolean {
+    const expectedOrdinals = Array.from(Array(listLength).keys());
+    return expectedOrdinals.every(ordinal => givenOrdinals.includes(ordinal));
   }
 
   //#endregion
