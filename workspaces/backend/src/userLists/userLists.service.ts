@@ -124,7 +124,7 @@ export class UserListsService {
   }
 
   /**
-   * Creates a user list. Requires user-specific write access
+   * Creates a user list. Returns the existing user list if one already exists for this list & user. Requires user-specific write access
    *
    * @param userId
    * @param createDto
@@ -137,6 +137,14 @@ export class UserListsService {
       validateObjectId(createDto.list);
       const list = await this.hasListReadAccess(userId, createDto.list);
       if (!list) throw new MongooseError.ValidationError(null);
+
+      const existingUserList = await this.model.findOne({
+        $and: [{ list: new Types.ObjectId(createDto.list) }, { userId }],
+      });
+
+      if (existingUserList) {
+        return UserListDto.assign(existingUserList);
+      }
 
       let listItems: Types.ObjectId[];
       switch (list.type) {

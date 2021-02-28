@@ -7,7 +7,7 @@ import { BookList } from 'src/library/entities/list/BookList';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { appRoutes } from 'src/main/routes';
 import ListCard from './ListCard';
-import ListsPlaceholder from '../../library/components/lists/ListsPlaceholder';
+import ListsPlaceholder from '../../../library/components/lists/ListsPlaceholder';
 import SegmentPlaceholder from 'src/library/components/shared/SegmentPlaceholder';
 
 type MyListsProps = {

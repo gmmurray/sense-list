@@ -303,15 +303,18 @@ const ViewList = () => {
     );
   }
   return (
-    <Segment placeholder>
-      <Header icon>
-        <Icon name="search" />
-        That list could not be found
-      </Header>
-      <Button primary as={Link} to={appRoutes.home.index.path}>
-        Return home
-      </Button>
-    </Segment>
+    <Fragment>
+      <BreadcrumbWrapper breadcrumbs={appRoutes.lists.view.breadcrumbs!} />
+      <Segment placeholder>
+        <Header icon>
+          <Icon name="search" />
+          That list could not be found
+        </Header>
+        <Button primary as={Link} to={appRoutes.progress.start.path}>
+          View lists
+        </Button>
+      </Segment>
+    </Fragment>
   );
 };
 

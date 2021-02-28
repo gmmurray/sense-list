@@ -1,6 +1,7 @@
 import { Redirect } from 'react-router-dom';
 import { RouteBreadcrumb, RouteTree } from 'src/library/types/routes';
-import StartList from 'src/pages/progress/StartList';
+import StartList from 'src/pages/progress/start/StartList';
+import ViewUserList from 'src/pages/progress/view/ViewUserList';
 import homeRoutes from './home';
 
 const routePrefix = '/progress';
@@ -22,6 +23,13 @@ const startBreadcrumbs: RouteBreadcrumb[] = [
   },
 ];
 
+const viewBreadcrumbs: RouteBreadcrumb[] = [
+  ...progressBreadcrumbs,
+  {
+    name: 'View',
+  },
+];
+
 const progressRoutes: RouteTree = {
   progress: {
     name: 'Progress',
@@ -38,6 +46,15 @@ const progressRoutes: RouteTree = {
     isPrivate: true,
     exact: true,
     breadcrumbs: startBreadcrumbs,
+  },
+  view: {
+    name: 'View',
+    path: `${routePrefix}/view/:userListId`,
+    render: props => <ViewUserList {...props} />,
+    isPrivate: true,
+    exact: true,
+    getDynamicPath: userListId => `${routePrefix}/view/${userListId}`,
+    breadcrumbs: viewBreadcrumbs,
   },
 };
 

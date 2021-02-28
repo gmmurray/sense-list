@@ -12,3 +12,11 @@ export class UserList {
     public updatedAt: Date,
   ) {}
 }
+
+export class CreateUserListDto {
+  constructor(public list: string, public notes: string) {}
+}
+
+export class PatchUserListDto {
+  constructor(public notes: string) {}
+}
