@@ -33,3 +33,21 @@ export class PopulatedBULI extends ULI {
     super(id, userList, userId, notes, createdAt, updatedAt);
   }
 }
+
+export class CreateBULIDto {
+  constructor(
+    public userList: string,
+    public bookListItem: string,
+    public status: BookReadingStatus,
+    public owned: boolean,
+    public notes?: string,
+  ) {}
+}
+
+export class PatchBULIDto {
+  constructor(
+    public notes?: string,
+    public status?: BookReadingStatus,
+    public owned?: boolean,
+  ) {}
+}

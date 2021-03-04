@@ -3,10 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { FC } from 'react';
 import { Button, Message, Modal } from 'semantic-ui-react';
 import { searchGoogleBooks } from 'src/library/api/backend/googleBooks';
-import {
-  GoogleApiBook,
-  GoogleApiIndustryIdentifierType,
-} from 'src/library/entities/googleBooks/GoogleApiBook';
+import { GoogleApiBook } from 'src/library/entities/googleBooks/GoogleApiBook';
 import {
   GoogleApiBookOrderBy,
   GoogleApiBookSearchOptions,

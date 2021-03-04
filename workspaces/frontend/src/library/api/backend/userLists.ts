@@ -22,6 +22,16 @@ export const getHomePageUserLists = async (
   });
 };
 
+export const getAllUserLists = async (
+  authContext: Auth0ContextInterface,
+): Promise<DataTotalResponse<BookUserList>> => {
+  return await authenticatedRequest({
+    authContext,
+    method: 'GET',
+    url: userListsRoute,
+  });
+};
+
 export const createUserList = async (
   authContext: Auth0ContextInterface,
   data: CreateUserListDto,
@@ -54,6 +64,17 @@ export const getFullUserList = async (
   return await authenticatedRequest({
     authContext,
     method: 'GET',
+    url: `${userListsRoute}/${userListId}`,
+  });
+};
+
+export const deleteUserList = async (
+  authContext: Auth0ContextInterface,
+  userListId: string,
+): Promise<void> => {
+  return await authenticatedRequest({
+    authContext,
+    method: 'DELETE',
     url: `${userListsRoute}/${userListId}`,
   });
 };

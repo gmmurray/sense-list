@@ -9,6 +9,7 @@ import { appRoutes } from 'src/main/routes';
 import ListCard from './ListCard';
 import ListsPlaceholder from '../../../library/components/lists/ListsPlaceholder';
 import SegmentPlaceholder from 'src/library/components/shared/SegmentPlaceholder';
+import { syncSearch } from 'src/library/utilities/search';
 
 type MyListsProps = {
   loading: boolean;
@@ -23,18 +24,7 @@ const MyLists: FC<MyListsProps> = ({ loading, data }) => {
   );
 
   const visibleLists = searchTerm
-    ? data.data.filter(
-        list =>
-          list.title
-            .toLocaleLowerCase()
-            .includes(searchTerm.toLocaleLowerCase()) ||
-          list.description
-            .toLocaleLowerCase()
-            .includes(searchTerm.toLocaleLowerCase()) ||
-          list.category
-            .toLocaleLowerCase()
-            .includes(searchTerm.toLocaleLowerCase()),
-      )
+    ? syncSearch(searchTerm, ['title', 'description', 'category'], data.data)
     : data.data;
 
   const showEmptyResult = !loading && data.total === 0;

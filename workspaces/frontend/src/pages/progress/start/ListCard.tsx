@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { FC } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import { Button, Card, Icon } from 'semantic-ui-react';
+import { Button, Card, Grid, Icon } from 'semantic-ui-react';
 import { BookList } from 'src/library/entities/list/BookList';
 import { CreateUserListDto } from 'src/library/entities/userList/UserList';
 import { appRoutes } from 'src/main/routes';
@@ -53,7 +53,7 @@ const ListCard: FC<ListCardProps> = ({ list }) => {
       <Card.Content
         extra
       >{`${bookListItems.length} book(s) in list`}</Card.Content>
-      <Card.Content extra>
+      <Card.Content extra as={Grid} textAlign="center">
         <Button.Group>
           <Button
             as={Link}

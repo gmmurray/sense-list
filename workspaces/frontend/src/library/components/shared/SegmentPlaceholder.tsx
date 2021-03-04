@@ -9,6 +9,7 @@ type SegmentPlaceHolderProps = {
   linkTo?: string;
   linkText?: string;
   hideButton?: boolean;
+  [key: string]: any;
 };
 
 const SegmentPlaceholder: FC<SegmentPlaceHolderProps> = ({
@@ -17,10 +18,11 @@ const SegmentPlaceholder: FC<SegmentPlaceHolderProps> = ({
   linkTo,
   linkText,
   hideButton,
+  ...segmentProps
 }) => {
   const showButton = !hideButton && linkText && linkTo;
   return (
-    <Segment placeholder>
+    <Segment placeholder {...segmentProps}>
       <Header icon>
         <Icon name={iconName} />
         {text}

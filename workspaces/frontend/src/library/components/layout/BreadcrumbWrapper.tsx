@@ -6,9 +6,13 @@ import { RouteBreadcrumb } from 'src/library/types/routes';
 
 type BreadcrumbWrapperProps = {
   breadcrumbs: RouteBreadcrumb[];
+  onPage?: boolean;
 };
 
-const BreadcrumbWrapper: FC<BreadcrumbWrapperProps> = ({ breadcrumbs }) => {
+const BreadcrumbWrapper: FC<BreadcrumbWrapperProps> = ({
+  breadcrumbs,
+  onPage,
+}) => {
   if (breadcrumbs.length === 0) {
     return null;
   } else if (breadcrumbs.length === 1) {
@@ -32,6 +36,14 @@ const BreadcrumbWrapper: FC<BreadcrumbWrapperProps> = ({ breadcrumbs }) => {
               >
                 {name}
               </Breadcrumb.Section>
+            );
+          }
+          if (onPage) {
+            return (
+              <Fragment key={`${name}-breadcrumb`}>
+                <Breadcrumb.Divider icon="right angle" />
+                <Breadcrumb.Section key={to}>{name}</Breadcrumb.Section>
+              </Fragment>
             );
           }
           return (

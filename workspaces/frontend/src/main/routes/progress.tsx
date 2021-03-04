@@ -1,43 +1,41 @@
-import { Redirect } from 'react-router-dom';
 import { RouteBreadcrumb, RouteTree } from 'src/library/types/routes';
 import StartList from 'src/pages/progress/start/StartList';
 import ViewUserList from 'src/pages/progress/view/ViewUserList';
+import ProgressList from 'src/pages/progress/list/ProgressList';
 import homeRoutes from './home';
 
 const routePrefix = '/progress';
 
-const name = 'Progress';
-
-const progressBreadcrumbs: RouteBreadcrumb[] = [
+const listBreadcrumbs: RouteBreadcrumb[] = [
   ...homeRoutes.index.breadcrumbs!,
   {
-    name,
+    name: 'Progress',
     to: routePrefix,
   },
 ];
 
 const startBreadcrumbs: RouteBreadcrumb[] = [
-  ...progressBreadcrumbs,
+  ...listBreadcrumbs,
   {
     name: 'Start',
   },
 ];
 
 const viewBreadcrumbs: RouteBreadcrumb[] = [
-  ...progressBreadcrumbs,
+  ...listBreadcrumbs,
   {
     name: 'View',
   },
 ];
 
 const progressRoutes: RouteTree = {
-  progress: {
+  list: {
     name: 'Progress',
     path: routePrefix,
-    render: () => <Redirect to={`${routePrefix}/start`} />,
+    render: props => <ProgressList {...props} />,
     isPrivate: true,
     exact: true,
-    breadcrumbs: progressBreadcrumbs,
+    breadcrumbs: listBreadcrumbs,
   },
   start: {
     name: 'Start',

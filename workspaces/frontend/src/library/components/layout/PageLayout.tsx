@@ -33,7 +33,6 @@ const PageLayout: FC<PageLayoutType> = ({ children }) => {
       >
         <Sidebar
           as={Menu}
-          onHide={() => setNavOpen(false)}
           animation="overlay"
           direction="left"
           inverted
@@ -71,8 +70,8 @@ const PageLayout: FC<PageLayoutType> = ({ children }) => {
           </Menu.Item>
           <Menu.Item
             as={Link}
-            active={location.pathname === appRoutes.home.index.path}
-            to={appRoutes.home.index.path}
+            active={location.pathname === appRoutes.progress.list.path}
+            to={appRoutes.progress.list.path}
           >
             <Icon name="book" />
             Progress

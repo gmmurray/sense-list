@@ -63,6 +63,11 @@ export class UserListsService {
       const result = await this.model
         .find({ userId })
         .populate(getSingleListPropName())
+        .populate({
+          path: getMultiUserListItemPropName(ListType.Book),
+          model: getUserListItemModelName(ListType.Book),
+          match: { userId },
+        })
         .exec();
 
       return new DataTotalResponse(result.map(doc => UserListDto.assign(doc)));
