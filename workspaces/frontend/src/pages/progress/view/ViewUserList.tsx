@@ -14,6 +14,7 @@ import {
   Confirm,
   Grid,
 } from 'semantic-ui-react';
+import dateformat from 'dateformat';
 import SegmentPlaceholder from 'src/library/components/shared/SegmentPlaceholder';
 import {
   BULI,
@@ -249,6 +250,7 @@ const ViewUserList = () => {
     );
   } else if (userList) {
     const { list } = userList;
+    const formatedUpdatedAt = dateformat(new Date(list.updatedAt), 'longDate');
 
     const hasEditListPermission = list.ownerId === auth.user.sub;
 
@@ -293,7 +295,7 @@ const ViewUserList = () => {
             <Grid.Row>
               <Grid.Column>
                 <Header sub>Last updated</Header>
-                <span>{list.updatedAt}</span>
+                <span>{formatedUpdatedAt}</span>
               </Grid.Column>
               <Grid.Column>
                 <Header sub>Personal note</Header>

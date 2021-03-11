@@ -4,13 +4,10 @@ import { Fragment } from 'react';
 import { useAlert } from 'react-alert';
 import { Container, Tab, TabPaneProps, TabProps } from 'semantic-ui-react';
 import { SemanticShorthandItem } from 'semantic-ui-react/dist/commonjs/generic';
-import {
-  getPrivateLists,
-  getPublicListsByQuery,
-} from 'src/library/api/backend/lists';
+import * as listsApi from 'src/library/api/backend/lists';
 import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
-import { BookList, QueryBookListDto } from 'src/library/entities/list/BookList';
+import { BookList, QueryBookListDto } from 'src/library/entities/list/Booklist';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { appRoutes } from 'src/main/routes';
 import MyLists from './MyLists';
@@ -45,7 +42,7 @@ const StartList = () => {
   const getMyLists = useCallback(async () => {
     setMyListsLoading(true);
     try {
-      const data = await getPrivateLists(auth);
+      const data = await listsApi.getPrivateLists(auth);
       setMyLists(data);
     } catch (error) {
       alert.error(error.message, defaultErrorTimeout);
@@ -59,7 +56,7 @@ const StartList = () => {
       setPublicListsLoading(true);
       try {
         const query = new QueryBookListDto(searchTerm, false);
-        const data = await getPublicListsByQuery(auth, query);
+        const data = await listsApi.getPublicListsByQuery(auth, query);
         setPublicLists(data);
       } catch (error) {
         alert.error(error.message, defaultErrorTimeout);

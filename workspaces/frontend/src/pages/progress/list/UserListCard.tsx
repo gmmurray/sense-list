@@ -1,7 +1,8 @@
+import dateFormat from 'dateformat';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Card, Grid, Header, Label, Progress } from 'semantic-ui-react';
-import { BookList } from 'src/library/entities/list/BookList';
+import { BookList } from 'src/library/entities/list/Booklist';
 import { BULI } from 'src/library/entities/uli/BookUserListItem';
 import { BookUserList } from 'src/library/entities/userList/BookUserList';
 import {
@@ -30,6 +31,7 @@ const UserListCard: FC<UserListCardProps> = ({ userList }) => {
     readingProgress,
     bookListItems.length,
   );
+  const formattedUpdatedAt = dateFormat(new Date(updatedAt), 'longDate');
 
   return (
     <Card raised fluid>
@@ -62,7 +64,7 @@ const UserListCard: FC<UserListCardProps> = ({ userList }) => {
             </Grid.Column>
             <Grid.Column width="four">
               <Header sub content="Last updated" />
-              {updatedAt}
+              {formattedUpdatedAt}
             </Grid.Column>
           </Grid>
         </Card.Description>

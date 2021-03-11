@@ -1,5 +1,5 @@
 import { Auth0ContextInterface } from '@auth0/auth0-react';
-import { BookList, QueryBookListDto } from 'src/library/entities/list/BookList';
+import { BookList, QueryBookListDto } from 'src/library/entities/list/Booklist';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { INewListInputs } from 'src/pages/lists/new/schema';
 import { IEditListInputs } from 'src/pages/lists/view/schema';

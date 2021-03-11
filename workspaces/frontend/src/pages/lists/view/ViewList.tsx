@@ -18,10 +18,10 @@ import {
   deleteBookListItem,
   updateListItemOrdinals,
 } from 'src/library/api/backend/listItems';
-import { getList, updateList } from 'src/library/api/backend/lists';
+import * as listsApi from 'src/library/api/backend/lists';
 import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
-import { BookList } from 'src/library/entities/list/BookList';
+import { BookList } from 'src/library/entities/list/Booklist';
 import { BookListItem } from 'src/library/entities/listItem/BookListItem';
 import { appRoutes } from 'src/main/routes';
 import NewListItemModal from './modal/NewListItemModal';
@@ -68,7 +68,7 @@ const ViewList = () => {
   const getListData = useCallback(async () => {
     setListLoading(true);
     try {
-      const data = await getList(auth, listId);
+      const data = await listsApi.getList(auth, listId);
       setList(data);
     } catch (error) {
       alert.error(error.message, defaultErrorTimeout);
@@ -82,7 +82,7 @@ const ViewList = () => {
       setFormUpdateLoading(true);
       setUpdateError(null);
       try {
-        await updateList(auth, listId, data);
+        await listsApi.updateList(auth, listId, data);
         await getListData();
         setIsEditingForm(false);
         alert.success('List successfully saved');

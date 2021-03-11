@@ -8,8 +8,9 @@ import { appRoutes } from 'src/main/routes';
 import * as userListsApi from 'src/library/api/backend/userLists';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
 import { syncSearch } from 'src/library/utilities/search';
-import { BookList } from 'src/library/entities/list/BookList';
+import { BookList } from 'src/library/entities/list/Booklist';
 import AllUserLists from './AllUserLists';
+import { DEFAULT_FILTER_OPTIONS, filterBookUserLists } from './helpers';
 
 const searchableFields = ['title', 'description', 'category'];
 
@@ -23,6 +24,8 @@ const ProgressList = () => {
   const [allUserListsLoading, setAllUserListsLoading] = useState(true);
 
   const [visibleUserLists, setVisibleUserLists] = useState<BookUserList[]>([]);
+
+  const [filterOptions, setFilterOptions] = useState(DEFAULT_FILTER_OPTIONS);
 
   const getUserLists = useCallback(async () => {
     setAllUserListsLoading(true);
@@ -55,6 +58,10 @@ const ProgressList = () => {
     },
     [allUserLists.data],
   );
+
+  useEffect(() => {
+    setVisibleUserLists(filterBookUserLists(filterOptions, visibleUserLists));
+  }, [filterOptions, visibleUserLists]);
 
   return (
     <Fragment>

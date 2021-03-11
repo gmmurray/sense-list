@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { FC } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { Button, Card, Grid, Icon } from 'semantic-ui-react';
-import { BookList } from 'src/library/entities/list/BookList';
+import { BookList } from 'src/library/entities/list/Booklist';
 import { CreateUserListDto } from 'src/library/entities/userList/UserList';
 import { appRoutes } from 'src/main/routes';
 import * as userListApi from 'src/library/api/backend/userLists';

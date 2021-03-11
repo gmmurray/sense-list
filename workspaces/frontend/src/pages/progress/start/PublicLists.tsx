@@ -4,7 +4,7 @@ import { FC } from 'react';
 import { Button, Input, Menu, Segment, Tab } from 'semantic-ui-react';
 import ListsPlaceholder from 'src/library/components/lists/ListsPlaceholder';
 import SegmentPlaceholder from 'src/library/components/shared/SegmentPlaceholder';
-import { BookList } from 'src/library/entities/list/BookList';
+import { BookList } from 'src/library/entities/list/Booklist';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import ListCard from './ListCard';
 

@@ -9,10 +9,7 @@ import {
   GoogleApiBookSearchOptions,
   GoogleApiBookSearchWithin,
 } from 'src/library/entities/googleBooks/GoogleApiBookSearchOptions';
-import {
-  createBookListItem,
-  newListItemRequest,
-} from 'src/library/api/backend/listItems';
+import * as listItemApi from 'src/library/api/backend/listItems';
 import SearchView from './SearchView';
 import {
   DEFAULT_ERROR_STATE,
@@ -183,12 +180,12 @@ const NewListItemModal: FC<NewListItemModalProps> = ({
       handleSaveLoadingChange(true);
       handleSaveErrorChange(null);
       try {
-        const req: newListItemRequest = {
+        const req: listItemApi.newListItemRequest = {
           list: listId,
           volumeId: selectedBook.id,
           ordinal: newOrdinal,
         };
-        await createBookListItem(auth, req);
+        await listItemApi.createBookListItem(auth, req);
         alert.success('Item successfully added');
         onClose();
         onModalSubmitted();

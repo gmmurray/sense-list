@@ -11,7 +11,7 @@ import {
   Placeholder,
   Segment,
 } from 'semantic-ui-react';
-import { getHomePageUserLists } from 'src/library/api/backend/userLists';
+import * as userListsApi from 'src/library/api/backend/userLists';
 import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
 import { BookUserList } from 'src/library/entities/userList/BookUserList';
@@ -30,7 +30,7 @@ const Home = () => {
     const getData = async () => {
       setActiveListsLoading(true);
       try {
-        const data = await getHomePageUserLists(auth);
+        const data = await userListsApi.getHomePageUserLists(auth);
         setActiveLists(data);
       } catch (error) {
         alert.error(error.message, defaultErrorTimeout);

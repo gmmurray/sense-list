@@ -1,4 +1,4 @@
-import { BookList } from '../list/BookList';
+import { BookList } from '../list/Booklist';
 import { BULI } from '../uli/BookUserListItem';
 import { UserList } from './UserList';
 

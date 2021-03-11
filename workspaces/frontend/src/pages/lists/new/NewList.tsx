@@ -8,7 +8,7 @@ import WrappedTextInput from 'src/library/components/form/WrappedTextInput';
 import { getListTypeOptions, ListType } from 'src/library/types/ListType';
 import WrappedCheckbox from 'src/library/components/form/WrappedCheckbox';
 import WrappedSelect from 'src/library/components/form/WrappedSelect';
-import { createList } from 'src/library/api/backend/lists';
+import * as listsApi from 'src/library/api/backend/lists';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useHistory } from 'react-router-dom';
 import { appRoutes } from 'src/main/routes';
@@ -29,7 +29,7 @@ const NewList = () => {
     setLoading(true);
     setSubmissionError(null);
     try {
-      const result = await createList(auth, data);
+      const result = await listsApi.createList(auth, data);
       if (result) {
         const { id } = result;
         alert.success('List successfully created');

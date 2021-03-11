@@ -3,7 +3,7 @@ import { Fragment } from 'react';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Input, Menu, Segment, Tab } from 'semantic-ui-react';
-import { BookList } from 'src/library/entities/list/BookList';
+import { BookList } from 'src/library/entities/list/Booklist';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { appRoutes } from 'src/main/routes';
 import ListCard from './ListCard';
