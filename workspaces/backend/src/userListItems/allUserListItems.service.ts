@@ -48,8 +48,7 @@ export class AllUserListItemsService {
       default:
         throw new NotImplementedException();
     }
-    const affectedUserItems = await service.findAllBySingleListItem(
-      userId,
+    const affectedUserItems = await service.findAllBySingleListItemWithoutUser(
       listItemId,
     );
     await service.deleteAllUserItemsByIds(
@@ -84,8 +83,7 @@ export class AllUserListItemsService {
       default:
         throw new NotImplementedException();
     }
-    const affectedUserItems = await service.findAllByListItems(
-      userId,
+    const affectedUserItems = await service.findAllByListItemsWithoutUser(
       listItemIds,
     );
     await service.deleteAllUserItemsByIds(

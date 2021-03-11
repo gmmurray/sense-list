@@ -121,8 +121,16 @@ export abstract class UserListItemsService<
     listItemId: StringIdType,
   ): Promise<UserListItemDocument[]>;
 
+  abstract findAllBySingleListItemWithoutUser(
+    listItemId: StringIdType,
+  ): Promise<UserListItemDocument[]>;
+
   abstract findAllByListItems(
     userId: string,
+    listItemIds: Types.ObjectId[],
+  ): Promise<UserListItemDocument[]>;
+
+  abstract findAllByListItemsWithoutUser(
     listItemIds: Types.ObjectId[],
   ): Promise<UserListItemDocument[]>;
 

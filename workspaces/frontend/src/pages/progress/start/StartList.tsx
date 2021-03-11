@@ -7,7 +7,7 @@ import { SemanticShorthandItem } from 'semantic-ui-react/dist/commonjs/generic';
 import * as listsApi from 'src/library/api/backend/lists';
 import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
-import { BookList, QueryBookListDto } from 'src/library/entities/list/Booklist';
+import { BookList, QueryBookListDto } from 'src/library/entities/list/BookList';
 import { DataTotalResponse } from 'src/library/types/responseWrappers';
 import { appRoutes } from 'src/main/routes';
 import MyLists from './MyLists';

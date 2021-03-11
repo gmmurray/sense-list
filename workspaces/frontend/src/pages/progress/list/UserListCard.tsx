@@ -2,7 +2,7 @@ import dateFormat from 'dateformat';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Card, Grid, Header, Label, Progress } from 'semantic-ui-react';
-import { BookList } from 'src/library/entities/list/Booklist';
+import { BookList } from 'src/library/entities/list/BookList';
 import { BULI } from 'src/library/entities/uli/BookUserListItem';
 import { BookUserList } from 'src/library/entities/userList/BookUserList';
 import {
@@ -16,7 +16,13 @@ type UserListCardProps = {
 };
 
 const UserListCard: FC<UserListCardProps> = ({ userList }) => {
-  const { id: userListId, list, userId, userListItems, updatedAt } = userList;
+  const {
+    id: userListId,
+    list,
+    userId,
+    userListItems,
+    updatedAt: listUpdatedAt,
+  } = userList;
   const {
     id: listId,
     title,
@@ -31,7 +37,11 @@ const UserListCard: FC<UserListCardProps> = ({ userList }) => {
     readingProgress,
     bookListItems.length,
   );
-  const formattedUpdatedAt = dateFormat(new Date(updatedAt), 'longDate');
+  const latestProgressDate = (userListItems as BULI[]).reduce((a, b) =>
+    new Date(a.updatedAt) > new Date(b.updatedAt) ? a : b,
+  ).updatedAt;
+  const formattedLastProgress = dateFormat(latestProgressDate, 'longDate');
+  const formattedListUpdated = dateFormat(listUpdatedAt, 'longDate');
 
   return (
     <Card raised fluid>
@@ -48,8 +58,8 @@ const UserListCard: FC<UserListCardProps> = ({ userList }) => {
         <Card.Header>{title}</Card.Header>
         <Card.Meta>{category}</Card.Meta>
         <Card.Description>
-          <Grid columns="three" stackable padded>
-            <Grid.Column width="ten">
+          <Grid columns="two" stackable padded>
+            <Grid.Column width="fourteen">
               <Progress
                 value={readingProgress}
                 total={bookListItems.length}
@@ -62,9 +72,15 @@ const UserListCard: FC<UserListCardProps> = ({ userList }) => {
               <Header sub content="Books" />
               {bookListItems.length}
             </Grid.Column>
-            <Grid.Column width="four">
-              <Header sub content="Last updated" />
-              {formattedUpdatedAt}
+          </Grid>
+          <Grid columns="two" padded>
+            <Grid.Column>
+              <Header sub content="Last progress" />
+              {formattedLastProgress}
+            </Grid.Column>
+            <Grid.Column>
+              <Header sub content="List updated" />
+              {formattedListUpdated}
             </Grid.Column>
           </Grid>
         </Card.Description>

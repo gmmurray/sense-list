@@ -8,9 +8,13 @@ import { appRoutes } from 'src/main/routes';
 import * as userListsApi from 'src/library/api/backend/userLists';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
 import { syncSearch } from 'src/library/utilities/search';
-import { BookList } from 'src/library/entities/list/Booklist';
+import { BookList } from 'src/library/entities/list/BookList';
 import AllUserLists from './AllUserLists';
-import { DEFAULT_FILTER_OPTIONS, filterBookUserLists } from './helpers';
+import {
+  DEFAULT_FILTER_OPTIONS,
+  filterBookUserLists,
+  filterOptions,
+} from './helpers';
 
 const searchableFields = ['title', 'description', 'category'];
 
@@ -59,9 +63,18 @@ const ProgressList = () => {
     [allUserLists.data],
   );
 
+  const handleFilterChange = useCallback(
+    (filterChange: Partial<filterOptions>) => {
+      setFilterOptions({ ...filterOptions, ...filterChange });
+    },
+    [filterOptions],
+  );
+
   useEffect(() => {
-    setVisibleUserLists(filterBookUserLists(filterOptions, visibleUserLists));
-  }, [filterOptions, visibleUserLists]);
+    setVisibleUserLists(
+      filterBookUserLists(filterOptions, allUserLists.data, auth.user.sub),
+    );
+  }, [filterOptions]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Fragment>
@@ -73,6 +86,8 @@ const ProgressList = () => {
         data={visibleUserLists}
         loading={allUserListsLoading}
         onSearch={handleListSearch}
+        filter={filterOptions}
+        onFilterChange={handleFilterChange}
         emptyResults={allUserLists.total === 0}
       />
     </Fragment>

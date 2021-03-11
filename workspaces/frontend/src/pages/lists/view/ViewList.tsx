@@ -21,7 +21,7 @@ import {
 import * as listsApi from 'src/library/api/backend/lists';
 import BreadcrumbWrapper from 'src/library/components/layout/BreadcrumbWrapper';
 import { defaultErrorTimeout } from 'src/library/constants/alertOptions';
-import { BookList } from 'src/library/entities/list/Booklist';
+import { BookList } from 'src/library/entities/list/BookList';
 import { BookListItem } from 'src/library/entities/listItem/BookListItem';
 import { appRoutes } from 'src/main/routes';
 import NewListItemModal from './modal/NewListItemModal';
@@ -295,7 +295,8 @@ const ViewList = () => {
           header="Confirm"
           content={
             itemToBeDeleted
-              ? `Are you sure you want to remove ${itemToBeDeleted.title} by ${itemToBeDeleted.authors}?`
+              ? `Are you sure you want to remove ${itemToBeDeleted.title} by ${itemToBeDeleted.authors}?
+                This will completely remove any progress associated with this book for you and any other users`
               : undefined
           }
         />

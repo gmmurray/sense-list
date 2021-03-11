@@ -276,6 +276,21 @@ export class BULIService extends UserListItemsService<
   }
 
   /**
+   * Gets all of the BULI related to a specific list item regardless of user
+   *
+   * @param listItemId
+   */
+  async findAllBySingleListItemWithoutUser(
+    listItemId: StringIdType,
+  ): Promise<BookUserListItemDocument[]> {
+    return await this.bookModel
+      .find({
+        bookListItem: new Types.ObjectId(listItemId),
+      })
+      .exec();
+  }
+
+  /**
    * Gets all of the BULI related to any of the given list items
    *
    * @param userId
@@ -289,6 +304,19 @@ export class BULIService extends UserListItemsService<
       .find({
         $and: [{ userId }, { bookListItem: { $in: listItemIds } }],
       })
+      .exec();
+  }
+
+  /**
+   * Gets all of the BULI related to any of the given list items regardless of user
+   *
+   * @param listItemIds
+   */
+  async findAllByListItemsWithoutUser(
+    listItemIds: Types.ObjectId[],
+  ): Promise<BookUserListItemDocument[]> {
+    return await this.bookModel
+      .find({ bookListItem: { $in: listItemIds } })
       .exec();
   }
 }

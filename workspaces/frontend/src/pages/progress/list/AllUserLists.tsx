@@ -2,17 +2,20 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Fragment } from 'react';
 import { FC } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Input, Menu, Segment } from 'semantic-ui-react';
+import { Button, Dropdown, Input, Menu, Segment } from 'semantic-ui-react';
 import ListsPlaceholder from 'src/library/components/lists/ListsPlaceholder';
 import SegmentPlaceholder from 'src/library/components/shared/SegmentPlaceholder';
 import { BookUserList } from 'src/library/entities/userList/BookUserList';
 import { appRoutes } from 'src/main/routes';
+import { filterOptions } from './helpers';
 import UserListCard from './UserListCard';
 
 type AllUserListsProps = {
   loading: boolean;
   data: BookUserList[];
   onSearch: (searchTerm: string) => void;
+  filter: filterOptions;
+  onFilterChange: (filterChange: Partial<filterOptions>) => void;
   emptyResults: boolean;
 };
 
@@ -20,6 +23,8 @@ const AllUserLists: FC<AllUserListsProps> = ({
   loading,
   data,
   onSearch,
+  filter,
+  onFilterChange,
   emptyResults,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -50,7 +55,7 @@ const AllUserLists: FC<AllUserListsProps> = ({
 
   return (
     <Fragment>
-      <Menu borderless attached="top">
+      <Menu attached="top" borderless>
         <Menu.Item>
           <Button
             icon="plus"
@@ -59,6 +64,48 @@ const AllUserLists: FC<AllUserListsProps> = ({
             to={appRoutes.lists.new.path}
             compact
           />
+        </Menu.Item>
+        <Menu.Item>
+          <Dropdown text="Status">
+            <Dropdown.Menu>
+              <Dropdown.Item
+                selected={filter.status === 'all'}
+                onClick={() => onFilterChange({ status: 'all' })}
+                content="All"
+              />
+              <Dropdown.Item
+                selected={filter.status === 'complete'}
+                onClick={() => onFilterChange({ status: 'complete' })}
+                content="Completed"
+              />
+              <Dropdown.Item
+                selected={filter.status === 'incomplete'}
+                onClick={() => onFilterChange({ status: 'incomplete' })}
+                content="Incomplete"
+              />
+            </Dropdown.Menu>
+          </Dropdown>
+        </Menu.Item>
+        <Menu.Item>
+          <Dropdown text="Privacy">
+            <Dropdown.Menu>
+              <Dropdown.Item
+                selected={filter.listOwner === 'all'}
+                onClick={() => onFilterChange({ listOwner: 'all' })}
+                content="All"
+              />
+              <Dropdown.Item
+                selected={filter.listOwner === 'user'}
+                onClick={() => onFilterChange({ listOwner: 'user' })}
+                content="My lists"
+              />
+              <Dropdown.Item
+                selected={filter.listOwner === 'public'}
+                onClick={() => onFilterChange({ listOwner: 'public' })}
+                content="Public lists"
+              />
+            </Dropdown.Menu>
+          </Dropdown>
         </Menu.Item>
         <Menu.Item position="right">
           <Input
