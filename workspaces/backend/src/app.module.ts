@@ -9,6 +9,7 @@ import { ListItemsModule } from './listItems/listItems.module';
 import { UserListsModule } from './userLists/userLists.module';
 import { UserListItemsModule } from './userListItems/userListItems.module';
 import { GoogleBooksModule } from './googleBooks/googleBooks.module';
+import { BookUsersModule } from './users/books/bookUsers.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { GoogleBooksModule } from './googleBooks/googleBooks.module';
     ListItemsModule,
     UserListsModule,
     UserListItemsModule,
+    BookUsersModule,
   ],
 })
 export class AppModule {}

@@ -29,3 +29,7 @@ export enum OpenLibraryApiPermissions {
 export enum GoogleBooksApiPermissions {
   read = 'read:google-books',
 }
+
+export enum UserPermissions {
+  read = 'read:users',
+}

@@ -231,6 +231,29 @@ export class BULIService extends UserListItemsService<
 
   //#region non API methods
 
+  async findMostRecentUpdated(
+    userId: string,
+    count: number,
+  ): Promise<BULIDto[]> {
+    try {
+      const items = await this.bookModel
+        .find({ userId })
+        .sort({ updatedAt: 'desc' })
+        .limit(count)
+        .populate({
+          path: getSingleListItemPropName(ListType.Book),
+          model: getListItemModelName(ListType.Book),
+        })
+        .exec();
+
+      if (!items) throw new MongooseError.DocumentNotFoundError(null);
+
+      return items.map(doc => BULIDto.assign(doc));
+    } catch (error) {
+      handleHttpRequestError(error);
+    }
+  }
+
   /**
    * Creates a default user list item for each list item provided
    *

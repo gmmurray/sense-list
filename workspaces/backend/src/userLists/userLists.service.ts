@@ -276,6 +276,29 @@ export class UserListsService {
   //#region non API methods
 
   /**
+   * Gets the x most recently created user lists
+   *
+   * @param userId
+   * @param count
+   */
+  async findMostRecentCreated(
+    userId: string,
+    count: number,
+  ): Promise<UserListDto[]> {
+    try {
+      const result = await this.model
+        .find({ userId })
+        .sort({ createdAt: 'desc' })
+        .limit(count)
+        .populate(getSingleListPropName())
+        .exec();
+      return result.map(doc => UserListDto.assign(doc));
+    } catch (error) {
+      handleHttpRequestError(error);
+    }
+  }
+
+  /**
    * Adds or removes user list items from a user list
    *
    * @param userId
