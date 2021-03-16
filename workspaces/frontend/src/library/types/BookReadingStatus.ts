@@ -30,3 +30,10 @@ export const bookReadingStatusSelectOptions = Object.keys(
   text: bookReadingStatusWithValues[status].text,
   value: bookReadingStatusWithValues[status].value,
 }));
+
+export const getBookReadingStatusText = (status: BookReadingStatus): string => {
+  const key = Object.keys(bookReadingStatusWithValues).find(
+    key => bookReadingStatusWithValues[key].value === status,
+  );
+  return key ? bookReadingStatusWithValues[key].text : '';
+};

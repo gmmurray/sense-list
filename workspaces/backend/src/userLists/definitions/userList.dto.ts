@@ -59,6 +59,22 @@ export class UserListDto {
       throw new NotImplementedException();
     }
   }
+  static assignWithPopulatedListOnly(doc: UserListDocument) {
+    //TODO: remove "true"
+    if (true || (doc.bookUserListItems && doc.bookUserListItems.length)) {
+      return new UserListDto(
+        doc._id,
+        ListDto.assign(<ListDocument>doc.list),
+        doc.userId,
+        doc.notes,
+        doc.bookUserListItems,
+        doc.createdAt,
+        doc.updatedAt,
+      );
+    } else {
+      throw new NotImplementedException();
+    }
+  }
 }
 
 export class CreateUserListDto {

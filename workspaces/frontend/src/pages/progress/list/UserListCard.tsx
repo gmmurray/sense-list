@@ -66,6 +66,7 @@ const UserListCard: FC<UserListCardProps> = ({ userList }) => {
                 progress={readingProgress > 0 ? 'percent' : undefined}
                 indicating={readingProgress > 0}
                 label={progressText}
+                precision={readingProgress > 0 ? 0 : undefined}
               />
             </Grid.Column>
             <Grid.Column width="two">

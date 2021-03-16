@@ -58,7 +58,7 @@ const MyLists: FC<MyListsProps> = ({ loading, data }) => {
         </Menu.Item>
       </Menu>
       <Tab.Pane as={Segment} placeholder={usePlaceholder}>
-        {loading && <ListsPlaceholder />}
+        {loading && <ListsPlaceholder elements={5} />}
         {showEmptyResult && (
           <SegmentPlaceholder
             text="You don't have any lists yet"

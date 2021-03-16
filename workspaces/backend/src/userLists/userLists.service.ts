@@ -280,17 +280,55 @@ export class UserListsService {
    *
    * @param userId
    * @param count
+   * @param type
    */
   async findMostRecentCreated(
     userId: string,
     count: number,
+    type: ListType,
   ): Promise<UserListDto[]> {
     try {
       const result = await this.model
         .find({ userId })
         .sort({ createdAt: 'desc' })
         .limit(count)
+        .populate({
+          path: getSingleListPropName(),
+          populate: {
+            path: getMultiListItemPropName(type),
+            model: getListItemModelName(type),
+          },
+        })
+        .exec();
+      return result.map(doc => UserListDto.assignWithPopulatedListOnly(doc));
+    } catch (error) {
+      handleHttpRequestError(error);
+    }
+  }
+
+  /**
+   * Gets the x most recently updated user lists
+   *
+   * @param userId
+   * @param count
+   * @param type
+   */
+  async findMostRecentActive(
+    userId: string,
+    count: number,
+    type: ListType,
+  ): Promise<UserListDto[]> {
+    try {
+      const result = await this.model
+        .find({ userId })
+        .sort({ updatedAt: 'desc' })
+        .limit(count)
         .populate(getSingleListPropName())
+        .populate({
+          path: getMultiUserListItemPropName(type),
+          model: getUserListItemModelName(type),
+          match: { userId },
+        })
         .exec();
       return result.map(doc => UserListDto.assign(doc));
     } catch (error) {

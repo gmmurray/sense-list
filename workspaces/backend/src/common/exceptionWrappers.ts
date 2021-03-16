@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { Error as MongooseError, isValidObjectId, Types } from 'mongoose';
 import { StringIdType } from './types/stringIdType';
 
@@ -54,8 +54,13 @@ export const handleHttpRequestError = (err): HttpException => {
       throw noAccessOrDoesNotExistError();
     case MongooseError.CastError.name:
       throw invalidValuesError();
-    default:
-      throw internalServerError(err);
+    default: {
+      if (err.status && err.status === 400) {
+        throw new BadRequestException();
+      } else {
+        throw internalServerError(err);
+      }
+    }
   }
 };
 

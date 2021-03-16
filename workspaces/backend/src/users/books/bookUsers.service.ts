@@ -1,15 +1,21 @@
-import { Injectable } from '@nestjs/common';
-import { ObjectId, Types } from 'mongoose';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { handleHttpRequestError } from 'src/common/exceptionWrappers';
+import { ListType } from 'src/common/types/listType';
 import { DataTotalResponse } from 'src/common/types/responseWrappers';
 import { StringIdType } from 'src/common/types/stringIdType';
-import { List } from 'src/lists/definitions/list.schema';
+import { BookListItemDto } from 'src/listItems/books/definitions/bookListItem.dto';
+import { ListDto } from 'src/lists/definitions/list.dto';
 import { BULIService } from 'src/userListItems/books/buli.service';
 import { BULIDto } from 'src/userListItems/books/definitions/buli.dto';
 import { UserListDto } from 'src/userLists/definitions/userList.dto';
 import { UserListsService } from 'src/userLists/userLists.service';
 import { ActivityType } from '../definitions/activityType';
-import { UserActivityDto } from '../definitions/userActivity.dto';
+import {
+  RecentActivity,
+  RecentBULIActivity,
+  RecentUserListActivity,
+} from '../definitions/recentActivity';
 
 @Injectable()
 export class BookUsersService {
@@ -20,12 +26,22 @@ export class BookUsersService {
 
   async getRecentActivity(
     userId: string,
-  ): Promise<DataTotalResponse<UserActivityDto>> {
+    count: string,
+  ): Promise<DataTotalResponse<RecentActivity>> {
     try {
-      const result: UserActivityDto[] = [];
+      const queryCount = parseInt(count);
+      if (!queryCount) throw new BadRequestException();
+      const result: RecentActivity[] = [];
 
-      const listsReq = this.userListsService.findMostRecentCreated(userId, 5);
-      const itemsReq = this.buliService.findMostRecentUpdated(userId, 5);
+      const listsReq = this.userListsService.findMostRecentCreated(
+        userId,
+        5,
+        ListType.Book,
+      );
+      const itemsReq = this.buliService.findMostRecentUpdated(
+        userId,
+        queryCount,
+      );
       const complete = await Promise.all([listsReq, itemsReq]);
 
       const listsRes = complete[0];
@@ -66,23 +82,51 @@ export class BookUsersService {
     }
   }
 
+  async getActiveLists(
+    userId: string,
+    count: string,
+  ): Promise<DataTotalResponse<UserListDto>> {
+    try {
+      const queryCount = parseInt(count);
+      if (!queryCount) throw new BadRequestException();
+
+      const userLists = await this.userListsService.findMostRecentActive(
+        userId,
+        queryCount,
+        ListType.Book,
+      );
+
+      return new DataTotalResponse(userLists);
+    } catch (error) {
+      handleHttpRequestError(error);
+    }
+  }
+
   private addUserListToResult(
     userList: UserListDto,
-    result: UserActivityDto[],
+    result: RecentActivity[],
   ): void {
     result.push(
-      new UserActivityDto(ActivityType.start, userList.createdAt, {
-        name: (userList.list as List).title,
-      }),
+      new RecentUserListActivity(
+        userList.id,
+        ActivityType.start,
+        userList.createdAt,
+        (userList.list as ListDto).title,
+        ((userList.list as ListDto).bookListItems as BookListItemDto[]).length,
+      ),
     );
   }
 
-  private addBULIToResult(buli: BULIDto, result: UserActivityDto[]): void {
+  private addBULIToResult(buli: BULIDto, result: RecentActivity[]): void {
     result.push(
-      new UserActivityDto(ActivityType.progress, buli.updatedAt, {
-        status: buli.status,
-        owned: buli.owned,
-      }),
+      new RecentBULIActivity(
+        buli.userList as Types.ObjectId,
+        ActivityType.progress,
+        buli.updatedAt,
+        buli.status,
+        buli.owned,
+        (buli.bookListItem as BookListItemDto).meta.title,
+      ),
     );
   }
 }

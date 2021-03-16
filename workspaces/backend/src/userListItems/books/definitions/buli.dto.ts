@@ -65,6 +65,27 @@ export class BULIDto extends UserListItemDto {
       },
     );
   }
+  static assignWithPopulatedListItemsOnly(
+    doc: BookUserListItemDocument,
+  ): BULIDto {
+    let subUserList: UserListDto | undefined;
+    if (doc.userList && doc.userList instanceof Document) {
+      subUserList = UserListDto.assign(doc.userList);
+    }
+    return new BULIDto(
+      BookListItemDto.assign(<BookListItemDocument>doc.bookListItem),
+      doc.status,
+      doc.owned,
+      {
+        id: doc._id,
+        userList: subUserList || doc.userList,
+        userId: doc.userId,
+        notes: doc.notes,
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
+      },
+    );
+  }
 }
 
 export class CreateBULIDto {

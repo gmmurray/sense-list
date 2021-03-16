@@ -15,6 +15,7 @@
     "array-move": "^3.0.1",
     "axios": "^0.21.1",
     "dateformat": "^4.5.1",
+    "javascript-time-ago": "^2.3.4",
     "lodash.debounce": "^4.0.8",
     "react": "^17.0.1",
     "react-alert": "^7.0.2",
@@ -56,6 +57,7 @@
   "devDependencies": {
     "@types/dateformat": "^3.0.1",
     "@types/history": "^4.7.8",
+    "@types/javascript-time-ago": "^2.0.2",
     "@types/lodash.debounce": "^4.0.6",
     "@types/react-alert": "^5.2.0",
     "@types/react-router-dom": "^5.1.7"

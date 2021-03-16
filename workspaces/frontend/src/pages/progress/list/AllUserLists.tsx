@@ -39,7 +39,7 @@ const AllUserLists: FC<AllUserListsProps> = ({
   if (loading) {
     return (
       <Segment loading>
-        <ListsPlaceholder />
+        <ListsPlaceholder elements={5} />
       </Segment>
     );
   } else if (emptyResults) {

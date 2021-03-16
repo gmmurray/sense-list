@@ -57,7 +57,7 @@ const PublicLists: FC<PublicListsProps> = ({ loading, data, onSubmit }) => {
         </Menu.Item>
       </Menu>
       <Tab.Pane as={Segment}>
-        {loading && <ListsPlaceholder />}
+        {loading && <ListsPlaceholder elements={5} />}
         {showEmptyResult && (
           <SegmentPlaceholder
             text="No results to show"
