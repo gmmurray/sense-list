@@ -159,6 +159,7 @@ describe('Book User List Items', () => {
       notes: 'updated notes',
       status: BookReadingStatus.completed,
       owned: false,
+      rating: 3,
     };
     await request(app.getHttpServer())
       .patch(`${BASE_URL}/${buli.id}`)
@@ -174,6 +175,7 @@ describe('Book User List Items', () => {
     expect(result.body.notes).toEqual(body.notes);
     expect(result.body.status).toEqual(body.status);
     expect(result.body.owned).toEqual(body.owned);
+    expect(result.body.rating).toEqual(body.rating);
   });
 
   it('/DELETE BULI', async () => {

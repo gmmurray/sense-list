@@ -13,6 +13,7 @@ export class BULI extends ULI {
     public bookListItem: string,
     public status: BookReadingStatus,
     public owned: boolean,
+    public rating?: number | null,
   ) {
     super(id, userList, userId, notes, createdAt, updatedAt);
   }
@@ -29,6 +30,7 @@ export class PopulatedBULI extends ULI {
     public bookListItem: string,
     public status: BookReadingStatus,
     public owned: boolean,
+    public rating?: number | null,
   ) {
     super(id, userList, userId, notes, createdAt, updatedAt);
   }
@@ -40,6 +42,7 @@ export class CreateBULIDto {
     public bookListItem: string,
     public status: BookReadingStatus,
     public owned: boolean,
+    public rating?: number | null,
     public notes?: string,
   ) {}
 }
@@ -49,5 +52,6 @@ export class PatchBULIDto {
     public notes?: string,
     public status?: BookReadingStatus,
     public owned?: boolean,
+    public rating?: number | null,
   ) {}
 }

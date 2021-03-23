@@ -32,4 +32,5 @@ export const createBULI: CreateBULIDto = {
   status: BookReadingStatus.inProgress,
   owned: true,
   notes: 'test item',
+  rating: 3,
 };

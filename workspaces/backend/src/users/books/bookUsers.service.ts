@@ -126,6 +126,7 @@ export class BookUsersService {
         buli.status,
         buli.owned,
         (buli.bookListItem as BookListItemDto).meta.title,
+        buli.rating,
       ),
     );
   }

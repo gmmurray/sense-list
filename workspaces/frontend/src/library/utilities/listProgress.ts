@@ -18,6 +18,9 @@ export const getListOwnedProgressValue = (items: BULI[]): number => {
   return items.filter(item => item && item.owned).length;
 };
 
+export const getListRatingProgressValue = (items: BULI[]): number =>
+  items.filter(item => item && item.rating).length;
+
 export const getListReadingProgressText = (
   progressValue: number,
   total: number,

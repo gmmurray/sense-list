@@ -12,6 +12,7 @@ export class DefaultBULI {
     public bookListItem: Types.ObjectId | BookListItemDocument,
     public status: BookReadingStatus,
     public owned: boolean,
+    public rating?: number | null,
   ) {}
 
   static createDefault(
@@ -26,6 +27,7 @@ export class DefaultBULI {
       new Types.ObjectId(bookListItemId),
       BookReadingStatus.notStarted,
       false,
+      null,
     );
   }
 }

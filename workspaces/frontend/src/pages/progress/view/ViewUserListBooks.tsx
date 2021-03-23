@@ -15,6 +15,7 @@ import {
 import {
   getListOwnedProgressValue,
   getListReadingProgressValue,
+  getListRatingProgressValue,
 } from 'src/library/utilities/listProgress';
 import { removeHTMLTags } from 'src/library/utilities/stringHelpers';
 import BULICard from './BULICard';
@@ -52,6 +53,13 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
     [onUpdatesSave],
   );
 
+  const handleRatingChange = useCallback(
+    (value, buliId: string) => {
+      onUpdatesSave(buliId, { rating: value });
+    },
+    [onUpdatesSave],
+  );
+
   const handleNotesChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>, buliId: string) => {
       onUpdateChange(buliId, { notes: e.target.value });
@@ -71,6 +79,7 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
     .map(item => item.userItem!);
   const readingProgress = getListReadingProgressValue(userItems);
   const ownedProgress = getListOwnedProgressValue(userItems);
+  const ratingProgress = getListRatingProgressValue(userItems);
 
   if (items.length === 0) {
     return (
@@ -99,6 +108,13 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
         indicating={ownedProgress > 0}
         label="Books owned"
       />
+      <Progress
+        value={ratingProgress}
+        total={items.length}
+        progress={ratingProgress > 0 ? 'ratio' : undefined}
+        indicating={ratingProgress > 0}
+        label="Books rated"
+      />
       {items
         .sort((a, b) => a.book.ordinal - b.book.ordinal)
         .map(match => {
@@ -111,11 +127,12 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
           const truncatedDescription = truncateString(cleanedDescription, 150);
           const showBookInfo = !!pageCount || truncatedDescription.length > 0;
           if (userItem) {
-            const { id: userItemId, status, notes, owned } = userItem;
+            const { id: userItemId, status, notes, owned, rating } = userItem;
             const {
               status: updatesStatus,
               notes: updatesNotes,
               owned: updatesOwned,
+              rating: updatesRating,
             } = updates[userItemId];
             const isUpdating = updateLoading === userItemId;
             return (
@@ -125,9 +142,11 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
                 status={status}
                 notes={notes}
                 owned={owned}
+                rating={rating}
                 updatesStatus={updatesStatus}
                 updatesNotes={updatesNotes}
                 updatesOwned={updatesOwned}
+                updatesRating={updatesRating}
                 onStatusChange={(e, { value }) =>
                   handleStatusChange(value, userItemId)
                 }
@@ -139,6 +158,9 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
                 }
                 onOwnedChange={() =>
                   handleOwnedChange(!!!updates[userItemId].owned, userItem.id)
+                }
+                onRatingChange={(e, newRating) =>
+                  handleRatingChange(newRating, userItemId)
                 }
                 isUpdating={isUpdating}
                 bookId={book.id}
@@ -154,6 +176,7 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
                     status: BookReadingStatus.notStarted,
                     owned: false,
                     notes: '',
+                    rating: null,
                   })
                 }
               />
@@ -176,6 +199,7 @@ const ViewUserListBooks: FC<ViewUserListBooksProps> = ({
                     status: BookReadingStatus.notStarted,
                     owned: false,
                     notes: '',
+                    rating: null,
                   })
                 }
                 isCreating={createLoading !== null}

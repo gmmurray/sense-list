@@ -12,7 +12,7 @@ type BULIActivityProps = {
 };
 
 const BULIActivity: FC<BULIActivityProps> = ({
-  data: { identifier, timeStamp, title, status, owned },
+  data: { identifier, timeStamp, title, status, owned, rating },
   timeAgo,
 }) => {
   const statusText = getBookReadingStatusText(status);

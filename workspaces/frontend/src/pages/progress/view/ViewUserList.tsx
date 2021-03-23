@@ -72,11 +72,12 @@ const ViewUserList = () => {
 
       const defaultBuliUpdates: Record<string, PatchBULIDto> = {};
       data.userListItems.forEach(
-        ({ id, notes, status, owned }) =>
+        ({ id, notes, status, owned, rating }) =>
           (defaultBuliUpdates[id] = {
             notes,
             status,
             owned,
+            rating,
           }),
       );
       setBuliUpdates(defaultBuliUpdates);
@@ -93,11 +94,12 @@ const ViewUserList = () => {
       setNoteUpdate(userList.notes);
       const itemUpdates: Record<string, PatchBULIDto> = {};
       userList.userListItems.forEach(
-        ({ id, notes, status, owned }) =>
+        ({ id, notes, status, owned, rating }) =>
           (itemUpdates[id] = {
             notes,
             status,
             owned,
+            rating,
           }),
       );
       setBuliUpdates(itemUpdates);
@@ -190,7 +192,7 @@ const ViewUserList = () => {
 
   const handleBuliCreate = useCallback(
     async (data: Partial<CreateBULIDto>) => {
-      const { bookListItem, status, owned, notes } = data;
+      const { bookListItem, status, owned, rating, notes } = data;
       if (
         userList &&
         bookListItem &&
@@ -206,6 +208,7 @@ const ViewUserList = () => {
             bookListItem,
             status: status || BookReadingStatus.notStarted,
             owned: !!owned,
+            rating,
             notes,
           };
           const result = await buliApi.createBuli(auth, req);

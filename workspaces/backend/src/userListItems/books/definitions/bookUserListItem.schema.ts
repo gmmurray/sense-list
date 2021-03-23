@@ -19,6 +19,9 @@ export class BookUserListItem extends UserListItem {
 
   @Prop({ required: true })
   owned: boolean;
+
+  @Prop({ default: null })
+  rating: number | null;
 }
 
 export const BookUserListItemSchema = SchemaFactory.createForClass(

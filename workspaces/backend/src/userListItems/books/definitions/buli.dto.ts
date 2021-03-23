@@ -17,6 +17,7 @@ export class BULIDto extends UserListItemDto {
     public status: BookReadingStatus,
     public owned: boolean,
     baseProperties: UserListItemDto,
+    public rating?: number | null,
   ) {
     super();
     this.id = baseProperties.id;
@@ -48,6 +49,7 @@ export class BULIDto extends UserListItemDto {
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,
       },
+      doc.rating,
     );
   }
   static assignWithPopulatedDocuments(doc: BookUserListItemDocument): BULIDto {
@@ -63,6 +65,7 @@ export class BULIDto extends UserListItemDto {
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,
       },
+      doc.rating,
     );
   }
   static assignWithPopulatedListItemsOnly(
@@ -84,6 +87,7 @@ export class BULIDto extends UserListItemDto {
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,
       },
+      doc.rating,
     );
   }
 }
@@ -95,6 +99,7 @@ export class CreateBULIDto {
     public bookListItem: StringIdType,
     public status: BookReadingStatus,
     public owned: boolean,
+    public rating?: number | null,
     public notes?: string,
   ) {}
 }
@@ -103,9 +108,16 @@ export class PatchBULIDto {
   public notes: string;
   public status: BookReadingStatus;
   public owned: boolean;
-  constructor({ notes = undefined, status = undefined, owned = undefined }) {
+  public rating: number | null;
+  constructor({
+    notes = undefined,
+    status = undefined,
+    owned = undefined,
+    rating = undefined,
+  }) {
     this.notes = notes;
     this.status = status;
     this.owned = owned;
+    this.rating = rating;
   }
 }

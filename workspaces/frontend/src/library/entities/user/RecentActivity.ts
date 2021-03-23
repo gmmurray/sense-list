@@ -30,6 +30,7 @@ export class RecentBULIActivity extends RecentActivity {
     public status: BookReadingStatus,
     public owned: boolean,
     public title: string,
+    public rating?: number | null,
   ) {
     super(identifier, type, timeStamp);
   }

@@ -1,3 +1,4 @@
+import React, { useCallback } from 'react';
 import { FC } from 'react';
 import {
   Label,
@@ -14,6 +15,8 @@ import {
   Input,
   Button,
   Checkbox,
+  Rating,
+  RatingProps,
 } from 'semantic-ui-react';
 import {
   BookReadingStatus,
@@ -45,6 +48,9 @@ type BULICardProps = {
     event: React.FormEvent<HTMLInputElement>,
     data: CheckboxProps,
   ) => void;
+  rating?: number | null;
+  updatesRating?: number | null;
+  onRatingChange?: (event: React.SyntheticEvent, data: number) => void;
   isUpdating: boolean;
   bookId: string;
   thumbnail: string;
@@ -71,6 +77,8 @@ const BULICard: FC<BULICardProps> = ({
   onNotesSave,
   updatesOwned,
   onOwnedChange,
+  updatesRating,
+  onRatingChange,
   isUpdating,
   bookId,
   thumbnail,
@@ -82,6 +90,17 @@ const BULICard: FC<BULICardProps> = ({
   onBULICreate,
   isCreating,
 }) => {
+  const handleRatingChange = useCallback(
+    (e: React.SyntheticEvent, { rating = 0 }: RatingProps) => {
+      if (onRatingChange !== undefined) {
+        const parsedRating =
+          typeof rating === 'string' ? parseInt(rating) : rating;
+        onRatingChange(e, parsedRating);
+      }
+    },
+    [onRatingChange],
+  );
+
   const bookOnly = !!!id;
   let cardColor: CardProps['color'];
   if (bookOnly) cardColor = 'grey';
@@ -155,6 +174,16 @@ const BULICard: FC<BULICardProps> = ({
                 label="I have this book"
                 checked={updatesOwned}
                 onChange={onOwnedChange}
+              />
+            </Grid.Column>
+            <Grid.Column>
+              <Header sub content="Rating" />
+              <Rating
+                disabled={isUpdating || bookOnly}
+                clearable
+                maxRating={5}
+                rating={updatesRating || 0}
+                onRate={handleRatingChange}
               />
             </Grid.Column>
           </Grid.Row>
