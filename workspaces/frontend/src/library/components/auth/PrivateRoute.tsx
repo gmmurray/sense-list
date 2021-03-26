@@ -22,12 +22,7 @@ const PrivateRoute: React.FC<PrivateRouteType & RouteProps> = ({
   if (isAuthenticated) {
     return (
       <PageLayout>
-        <Route
-          {...rest}
-          isAuthenticated={isAuthenticated}
-          path={path}
-          render={render}
-        />
+        <Route {...rest} path={path} render={render} />
       </PageLayout>
     );
   } else {

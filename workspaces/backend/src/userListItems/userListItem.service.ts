@@ -4,6 +4,7 @@ import {
   Connection,
   Document,
   Error as MongooseError,
+  FilterQuery,
   Model,
   Types,
 } from 'mongoose';
@@ -145,7 +146,9 @@ export abstract class UserListItemsService<
     session: ClientSession,
   ): Promise<void> {
     await this.model.deleteMany(
-      { userlist: new Types.ObjectId(userListId) },
+      ({
+        userlist: new Types.ObjectId(userListId),
+      } as unknown) as FilterQuery<T>,
       { session },
     );
   }
@@ -164,7 +167,10 @@ export abstract class UserListItemsService<
     itemField: string,
     session: ClientSession,
   ): Promise<void> {
-    await this.model.deleteMany({ _id: { $in: userItemIds } }, { session });
+    await this.model.deleteMany(
+      { _id: { $in: userItemIds } } as FilterQuery<T>,
+      { session },
+    );
     await this.userListsService.updateItemsInAllUserLists(
       userId,
       '$pull',

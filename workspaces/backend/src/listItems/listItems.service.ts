@@ -4,6 +4,7 @@ import {
   Connection,
   Document,
   Error as MongooseError,
+  FilterQuery,
   Model,
   Types,
 } from 'mongoose';
@@ -191,7 +192,7 @@ export abstract class ListItemsService<
       session,
     );
     await this.model.deleteMany(
-      { list: new Types.ObjectId(listId) },
+      { list: new Types.ObjectId(listId) } as FilterQuery<T>,
       { session },
     );
   }
